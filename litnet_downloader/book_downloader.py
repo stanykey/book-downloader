@@ -10,10 +10,10 @@ from litnet_downloader.book import Book, Chapter
 
 
 class BookDownloader:
-    def __init__(self, /, url: str, token: str, debug: bool = False):
+    def __init__(self, *, url: str, token: str, delay_secs: int = 1):
         self._url = url
         self._token = token
-        self._debug = debug
+        self._delay = delay_secs
 
         self._cookies = {
             'litera-frontend': token
@@ -46,7 +46,7 @@ class BookDownloader:
         return deepcopy(self._book)
 
     def __repr__(self):
-        return f'BookDownloader(url: {self._url}, token: {self._token})'
+        return f'BookDownloader(url: {self._url}, token: {self._token}, delay: {self._delay})'
 
     def _load_book_metadata(self):
         response = requests.request('GET', url=self._url, cookies=self._cookies, verify=False)
@@ -74,7 +74,7 @@ class BookDownloader:
             print('Metadata read is failed!')
 
     def _download_page(self, chapter_id: str, page_index: int):
-        sleep(1)
+        sleep(self._delay)
 
         response = requests.request(
             'get',
