@@ -67,3 +67,7 @@ dmypy.json
 
 # tokens
 *.pickle
+
+# caches, tests data, etc.
+.cache
+data
