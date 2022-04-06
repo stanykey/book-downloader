@@ -12,6 +12,7 @@ from sys import exit
 from time import sleep
 from typing import Any
 
+from bs4 import BeautifulSoup
 from docopt import docopt
 
 from litnet_downloader.book import Book
@@ -37,18 +38,18 @@ def process_book(book: Book, /) -> None:
             print(f'process {idx + 1} of {len(book.chapters)}')
             print(f'\ttitle: {chapter.title}')
 
-            book_file.write(chapter.title)
-            book_file.write('\n\n')
+            book_file.write(f'{chapter.title}\n\n')
 
             with open(chapter.location, 'r', encoding='utf-8') as chapter_file:
-                content = ''.join(chapter_file.readlines())
-                content = content.replace('<p>', '')
-                content = content.replace('</p>', '')
-                content = content.replace('<br />', '')
+                source = chapter_file.read()
+                soup = BeautifulSoup(source)
+                text_blocks = [block.get_text() for block in soup.find_all('p')]
+                chapter_text = '\n\n'.join(text_blocks)
 
-            print(f'\tcontent size: {len(content)}')
+            print(f'\tchapter_text size: {len(chapter_text)}')
 
-            book_file.write(content)
+            book_file.write(chapter_text)
+            book_file.write('\n\n\n\n')
             book_file.flush()
 
 
