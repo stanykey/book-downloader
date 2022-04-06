@@ -29,30 +29,25 @@ class BookDownloader:
 
         self._book = None
 
-    def download_content(self) -> bool:
+    def download_content(self) -> None:
         for chapter in filter(lambda item: not item.downloaded, self._chapters):
             print(f'download chapter "{chapter.title}"...')
 
-            try:
-                data = self._download_page(chapter.id, 1)
+            data = self._download_page(chapter.id, 1)
 
-                pages = [data['data']]
-                for page_id in range(2, int(data['totalPages']) + 1):
-                    response = self._download_page(chapter.id, page_id)
-                    pages.append(response['data'])
+            pages = [data['data']]
+            for page_id in range(2, int(data['totalPages']) + 1):
+                response = self._download_page(chapter.id, page_id)
+                pages.append(response['data'])
 
-                with open(chapter.location, 'w', encoding='utf-8') as file:
-                    content = ''.join(pages)
-                    file.write(content)
-            except:
-                # we got some error (maybe we were blocked server)
-                return False
-
-        # all chapters were downloaded
-        return True
+            temp_location: Path = chapter.location.with_suffix('.download')
+            with open(temp_location, 'w', encoding='utf-8') as file:
+                file.writelines(pages)
+            temp_location.rename(chapter.location)
 
     def get_book(self) -> Book:
-        if not self._book and self.download_content():
+        if not self._book:
+            self.download_content()
             self._book = Book(self._author, self._title, self._chapters)
         return self._book
 
@@ -69,7 +64,6 @@ class BookDownloader:
         try:
             self._load_general_metadata(soup)
             self._load_chapters_metadata(soup)
-
         except AttributeError:
             print('Metadata read is failed!')
 
