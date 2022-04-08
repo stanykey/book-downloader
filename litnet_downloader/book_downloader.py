@@ -17,7 +17,7 @@ from litnet_downloader.metadata import ChapterMetadata, BookMetadata
 class BookDownloader:
     cache_location = Path(__file__).parent.resolve() / '.cache'
 
-    def __init__(self, *, token: str, delay_secs: int = 1):
+    def __init__(self, token: str, delay_secs: int = 1):
         self._token = token
         self._delay = delay_secs
 

@@ -2,10 +2,10 @@
 
 auth-token could be obtained from cookie 'litera-frontend'
 
-
 Usage:
-  litnet-downloader <auth-token> <book-url> [--page-delay=<seconds>]
-  litnet-downloader -h | --help | --version
+    litnet-downloader interactive
+    litnet-downloader <auth-token> <book-url> [--page-delay=<seconds>]
+    litnet-downloader -h | --help | --version
 """
 
 from sys import exit
@@ -19,12 +19,14 @@ from requests import RequestException
 from litnet_downloader.book import Book
 from litnet_downloader.book_downloader import BookDownloader
 from litnet_downloader.exceptions import DownloadException
+from litnet_downloader.utils import book_index_url
 from litnet_downloader.version import __version__
 
 
-def get_option(options: dict[str, Any], key: str, /, *, default: Any = None) -> Any:
+def get_option(options: dict[str, Any], key: str, /, *, default: Any = None, result_type=None) -> Any:
     option = options.get(key, default)
-    return option if option else default
+    option = option if option else default
+    return result_type(option) if result_type else option
 
 
 def get_book(downloader: BookDownloader, book_url: str, use_cache: bool) -> Book:
@@ -55,27 +57,56 @@ def process_book(book: Book, /) -> None:
             book_file.flush()
 
 
-def run() -> None:
-    arguments = docopt(__doc__, version=__version__)
+def download_book(downloader: BookDownloader, book_url: str, use_cache: bool):
+    try:
+        book = get_book(downloader, book_url, use_cache)
+        process_book(book)
+    except DownloadException as ex:
+        print(f'Error: {ex}')
 
-    downloader = BookDownloader(
-        token=arguments['<auth-token>'],
-        delay_secs=int(get_option(arguments, '--page-delay', default=1))
-    )
 
-    book = get_book(downloader, book_url=arguments['<book-url>'], use_cache=True)
-    process_book(book)
+def run_single_download(token: str, book_url: str, delay_secs: int) -> None:
+    downloader = BookDownloader(token, delay_secs)
 
-    answer = input('Delete cached books data? (yes/no) >> ')
+    download_book(downloader, book_url, use_cache=True)
+
+    answer = input('Delete cached books data? (yes/no): ')
     if answer.lower() == 'yes':
         downloader.reset_cache()
 
     input('Press Enter to exit...')
 
 
+def run_interactive() -> None:
+    token = input('enter auth token or press Enter to exit:\n  >> ')
+    if not token:
+        return
+
+    downloader = BookDownloader(token)
+    while True:
+        url = input('enter book url for download or press Enter to exit:\n  >> ')
+        if not url:
+            return
+
+        if book_url := book_index_url(url):
+            download_book(downloader, book_url, use_cache=True)
+        else:
+            print('invalid book url')
+            print('valid form is https://litnet.com/<lang>/reader/<book-name>[?params...]')
+            print()
+
+
+def run() -> None:
+    arguments = docopt(__doc__, version=__version__)
+    if arguments.get('interactive'):
+        return run_interactive()
+
+    return run_single_download(
+        token=arguments.get('<auth-token>'),
+        book_url=arguments.get('<book-url>'),
+        delay_secs=get_option(arguments, '--page-delay', result_type=int, default=1)
+    )
+
+
 if __name__ == '__main__':
-    try:
-        exit(run())
-    except DownloadException as ex:
-        print(ex)
-        exit(-1)
+    exit(run())
