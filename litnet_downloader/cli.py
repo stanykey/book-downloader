@@ -14,9 +14,11 @@ from typing import Any
 
 from bs4 import BeautifulSoup
 from docopt import docopt
+from requests import RequestException
 
 from litnet_downloader.book import Book
 from litnet_downloader.book_downloader import BookDownloader
+from litnet_downloader.exceptions import DownloadException
 from litnet_downloader.version import __version__
 
 
@@ -25,11 +27,13 @@ def get_option(options: dict[str, Any], key: str, /, *, default: Any = None) -> 
     return option if option else default
 
 
-def get_book(downloader: BookDownloader, /) -> Book:
-    while not (book := downloader.get_book()):
-        print("book wasn't downloaded, so sleep a bit try again")
-        sleep(5)
-    return book
+def get_book(downloader: BookDownloader, book_url: str, use_cache: bool) -> Book:
+    while True:
+        try:
+            return downloader.get(book_url, use_cache, clean_after=False)
+        except RequestException:
+            pass
+        sleep(5)  # TODO: maybe better is to pass as argument
 
 
 def process_book(book: Book, /) -> None:
@@ -40,11 +44,9 @@ def process_book(book: Book, /) -> None:
 
             book_file.write(f'{chapter.title}\n\n')
 
-            with open(chapter.location, 'r', encoding='utf-8') as chapter_file:
-                source = chapter_file.read()
-                soup = BeautifulSoup(source)
-                text_blocks = [block.get_text() for block in soup.find_all('p')]
-                chapter_text = '\n\n'.join(text_blocks)
+            soup = BeautifulSoup(chapter.content)
+            text_blocks = [block.get_text() for block in soup.find_all('p')]
+            chapter_text = '\n\n'.join(text_blocks)
 
             print(f'\tchapter_text size: {len(chapter_text)}')
 
@@ -57,20 +59,23 @@ def run() -> None:
     arguments = docopt(__doc__, version=__version__)
 
     downloader = BookDownloader(
-        url=arguments['<book-url>'],
         token=arguments['<auth-token>'],
         delay_secs=int(get_option(arguments, '--page-delay', default=1))
     )
 
-    book = get_book(downloader)
+    book = get_book(downloader, book_url=arguments['<book-url>'], use_cache=True)
     process_book(book)
 
-    answer = input('Delete cached book data? (yes/no) >> ')
+    answer = input('Delete cached books data? (yes/no) >> ')
     if answer.lower() == 'yes':
-        downloader.cleanup()
+        downloader.reset_cache()
 
     input('Press Enter to exit...')
 
 
 if __name__ == '__main__':
-    exit(run())
+    try:
+        exit(run())
+    except DownloadException as ex:
+        print(ex)
+        exit(-1)
