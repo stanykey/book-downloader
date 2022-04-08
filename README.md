@@ -14,12 +14,12 @@ Actually, this is an educational project with some personal profit: allows you t
 
 ---
 # Task List
-- [ ] add a possibility to continue/recover work after a crash or any other reason
+- [x] add a possibility to continue/recover work after a crash or any other reason
 - [ ] login into the site via any available source
   - [ ] pickup cookies for further use
 - [ ] upload to Google disk
 - [ ] compose result output file
-  - [ ] txt
+  - [x] txt
   - [ ] epub
   - [ ] fb2
 - [ ] improve ways to circumvent downloads protection mechanisms
