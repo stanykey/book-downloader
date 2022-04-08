@@ -82,3 +82,4 @@ class BookMetadata:
             chapters=[chapter.to_json() for chapter in self.chapters]
         )
         return json
+    
