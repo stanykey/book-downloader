@@ -10,13 +10,14 @@ Usage:
 from pathlib import Path
 from time import sleep
 
-from bs4 import BeautifulSoup
 from docopt import docopt
 from requests import RequestException
 
 from litnet_downloader.book import Book
 from litnet_downloader.book_downloader import BookDownloader
+from litnet_downloader.book_exporter import BookExporter
 from litnet_downloader.exceptions import DownloadException
+from litnet_downloader.formatters import TextFormatter
 from litnet_downloader.utils import book_index_url
 from litnet_downloader.version import __version__
 
@@ -30,29 +31,15 @@ def get_book(downloader: BookDownloader, book_url: str, use_cache: bool) -> Book
         sleep(5)  # TODO: maybe better is to pass as argument
 
 
-def process_book(book: Book, /) -> None:
-    with open(f"{book.title}.txt", "w", encoding="utf-8") as book_file:
-        for idx, chapter in enumerate(book.chapters):
-            print(f"process {idx + 1} of {len(book.chapters)}")
-            print(f"\ttitle: {chapter.title}")
-
-            book_file.write(f"{chapter.title}\n\n")
-
-            soup = BeautifulSoup(chapter.content)
-            text_blocks = [block.get_text() for block in soup.find_all("p")]
-            chapter_text = "\n\n".join(text_blocks)
-
-            print(f"\tchapter_text size: {len(chapter_text)}")
-
-            book_file.write(chapter_text)
-            book_file.write("\n\n\n\n")
-            book_file.flush()
+def save_book(book: Book, /) -> None:
+    exporter = BookExporter(output_root=Path(__file__).parent / "books", exporter=TextFormatter())
+    exporter.dump(book)
 
 
 def download_book(downloader: BookDownloader, book_url: str, use_cache: bool) -> None:
     try:
         book = get_book(downloader, book_url, use_cache)
-        process_book(book)
+        save_book(book)
     except DownloadException as ex:
         print(f"Error: {ex}")
 

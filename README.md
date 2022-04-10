@@ -32,4 +32,4 @@ For contributors
 If you want to contribute please do the following:
 - ensure you have installed the pre-commit package
 - run `pre-commit install`
-- [optionaly] run `pre-commit run --all-files`
+- [optional] run `pre-commit run --all-files`
