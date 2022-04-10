@@ -1,5 +1,6 @@
 """Literally, BookDownloader is the main class."""
 
+from functools import cache
 from hashlib import md5
 from pathlib import Path
 from shutil import rmtree
@@ -15,7 +16,10 @@ from litnet_downloader.metadata import ChapterMetadata, BookMetadata
 
 
 class BookDownloader:
-    cache_location = Path(__file__).parent.resolve() / '.cache'
+    @classmethod
+    @cache
+    def cache_location(cls) -> Path:
+        return Path(__file__).parent.resolve() / '.cache'
 
     def __init__(self, token: str, delay_secs: int = 1):
         self._token = token
@@ -159,7 +163,7 @@ class BookDownloader:
     @classmethod
     def compose_book_path(cls, book_url: str) -> Path:
         book_dir_name = cls._get_hash(book_url)
-        return cls.cache_location / book_dir_name
+        return cls.cache_location() / book_dir_name
 
     @classmethod
     def compose_chapter_path(cls, chapter: ChapterMetadata, book_dir: Path) -> Path:
