@@ -53,7 +53,7 @@ class BookDownloader:
         if use_cache and metadata.load() and metadata.completed:
             return metadata
 
-        response = send_http_request('GET', url, cookies=self._cookies, verify=False)
+        response = send_http_request('GET', url, cookies=self._cookies)
         soup = BeautifulSoup(response.text, 'lxml')
 
         try:
@@ -131,7 +131,6 @@ class BookDownloader:
             method='GET',
             url='https://litnet.com/reader/get-page',
             cookies=self._cookies,
-            verify=False,
             headers={'X-CSRF-Token': csrf},
             data={'chapterId': chapter_id, 'page': page_index}
         )
