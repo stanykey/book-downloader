@@ -91,20 +91,30 @@ class BookDownloader:
 
     def _download_book_content(self, meta: BookMetadata, use_cache: bool) -> None:
         for chapter in filter(lambda item: not (use_cache and item.downloaded), meta.chapters):
-            print(f'download chapter "{chapter.title}"...')
+            self._download_chapter(chapter, meta)
 
-            data = self._download_page(chapter.id, 1, meta.csrf)
+    def _download_chapter(self, chapter: ChapterMetadata, meta: BookMetadata):
+        print(f'download chapter "{chapter.title}"...')
 
-            pages = [data['data']]
-            for page_id in range(2, int(data['totalPages']) + 1):
-                response = self._download_page(chapter.id, page_id, meta.csrf)
-                pages.append(response['data'])
+        pages = self._get_chapter_content(chapter, meta)
+        self._save_chapter_content(chapter, pages)
 
-            temp_location: Path = chapter.content_path.with_suffix('.download')
-            temp_location.parent.mkdir(parents=True, exist_ok=True)
-            with open(temp_location, 'w', encoding='utf-8') as file:
-                file.writelines(pages)
-            temp_location.rename(chapter.content_path)
+    def _get_chapter_content(self, chapter: ChapterMetadata, meta: BookMetadata) -> list[str]:
+        data = self._download_page(chapter.id, 1, meta.csrf)
+
+        pages = [data['data']]
+        for page_id in range(2, int(data['totalPages']) + 1):
+            response = self._download_page(chapter.id, page_id, meta.csrf)
+            pages.append(response['data'])
+        return pages
+
+    @classmethod
+    def _save_chapter_content(cls, chapter: ChapterMetadata, pages: list[str]):
+        temp_location = chapter.content_path.with_suffix('.download')
+        temp_location.parent.mkdir(parents=True, exist_ok=True)
+        with open(temp_location, 'w', encoding='utf-8') as file:
+            file.writelines(pages)
+        temp_location.rename(chapter.content_path)
 
     @staticmethod
     def _make_book(meta: BookMetadata) -> Book:
