@@ -47,4 +47,4 @@ repos:
           - --ignore-missing-imports
           - --strict
         additional_dependencies:
-          - types-requests
+          - types-aiofiles

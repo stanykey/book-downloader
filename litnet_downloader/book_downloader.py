@@ -1,15 +1,21 @@
 """Literally, BookDownloader is the main class."""
+from asyncio import gather as wait_for_all
+from asyncio import run as run_coroutine
+from asyncio import sleep as sleep_for
 from functools import cache
 from hashlib import md5
+from json import JSONDecodeError
 from pathlib import Path
+from random import randint
 from shutil import rmtree
-from time import sleep
+from ssl import create_default_context as default_ssl_context
 from typing import Any
 from typing import cast
 
+from aiofiles import open as open_file
+from aiohttp import ClientResponseError
+from aiohttp import ClientSession
 from bs4 import BeautifulSoup
-from requests import request as send_http_request
-from requests import Response
 
 from litnet_downloader.book_data import BookData
 from litnet_downloader.book_data import ChapterData
@@ -27,7 +33,7 @@ class BookDownloader:
     def __init__(self, token: str, delay_secs: int = 0, pem_path: Path | None = None):
         self._token = token
         self._delay = delay_secs
-        self._pem_path = pem_path
+        self._ssl_context = default_ssl_context(cafile=pem_path)
 
         self._cookies = {"litera-frontend": token}
 
@@ -36,10 +42,8 @@ class BookDownloader:
     def get(self, book_url: str, /, use_cache: bool = True, clean_after: bool = True) -> BookData:
         book_dir = self._get_working_directory(book_url, clean=not use_cache)
 
-        metadata = self._get_book_metadata(book_url, book_dir, use_cache)
-        self._download_book_content(metadata, use_cache)
-
-        book = self._make_book(metadata)
+        metadata: BookMetadata = run_coroutine(self._download_book(book_url, book_dir, use_cache))
+        book: BookData = self._make_book(metadata)
 
         if clean_after:
             self._remove_from_cache(book_dir)
@@ -50,13 +54,18 @@ class BookDownloader:
         for book_dir in list(self._cached_book_data):
             self._remove_from_cache(book_dir)
 
-    def _get_book_metadata(self, url: str, working_dir: Path, use_cache: bool) -> BookMetadata:
+    async def _download_book(self, book_url: str, book_dir: Path, use_cache: bool) -> BookMetadata:
+        metadata = await self._get_book_metadata(book_url, book_dir, use_cache)
+        await self._download_book_content(metadata, use_cache)
+        return metadata
+
+    async def _get_book_metadata(self, url: str, working_dir: Path, use_cache: bool) -> BookMetadata:
         metadata = BookMetadata(working_dir)
         if use_cache and metadata.load() and metadata.completed:
             return metadata
 
-        response = self._send_request(url)
-        soup = BeautifulSoup(response.text, "lxml")
+        response = await self._get_book_page(url)
+        soup = BeautifulSoup(response, "lxml")
         try:
             # get common data
             metadata.csrf = soup.find("meta", attrs={"name": "csrf-token"}).attrs["content"]
@@ -90,31 +99,41 @@ class BookDownloader:
 
         return chapters
 
-    def _download_book_content(self, meta: BookMetadata, use_cache: bool) -> None:
-        for chapter in filter(lambda item: not (use_cache and item.downloaded), meta.chapters):
-            self._download_chapter(chapter, meta)
+    async def _download_book_content(self, meta: BookMetadata, use_cache: bool) -> None:
+        headers = {"X-CSRF-Token": meta.csrf}
+        async with ClientSession(headers=headers, cookies=self._cookies) as session:
+            chapters = list(filter(lambda item: not (use_cache and item.downloaded), meta.chapters))
+            tasks = (self._download_chapter(session, chapter) for chapter in chapters)
+            await wait_for_all(*tasks)
 
-    def _download_chapter(self, chapter: ChapterMetadata, meta: BookMetadata) -> None:
-        print(f'download chapter "{chapter.title}"...')
+    async def _download_chapter(self, session: ClientSession, chapter: ChapterMetadata) -> None:
+        pages = await self._get_chapter_content(session, chapter)
+        await self._save_chapter_content(chapter, pages)
 
-        pages = self._get_chapter_content(chapter, meta)
-        self._save_chapter_content(chapter, pages)
-
-    def _get_chapter_content(self, chapter: ChapterMetadata, meta: BookMetadata) -> list[str]:
-        data = self._download_page(chapter.id, 1, meta.csrf)
+    async def _get_chapter_content(self, session: ClientSession, chapter: ChapterMetadata) -> list[str]:
+        data = await self._get_chapter_data(session, chapter.id, 1)
+        if "data" not in data:
+            return []
 
         pages = [data["data"]]
         for page_id in range(2, int(data["totalPages"]) + 1):
-            response = self._download_page(chapter.id, page_id, meta.csrf)
+            response = await self._get_chapter_data(session, chapter.id, page_id)
+            if "data" not in response:
+                return []
             pages.append(response["data"])
+
+        print(f"chapter {chapter.title} is downloaded")
         return pages
 
     @classmethod
-    def _save_chapter_content(cls, chapter: ChapterMetadata, pages: list[str]) -> None:
+    async def _save_chapter_content(cls, chapter: ChapterMetadata, pages: list[str]) -> None:
+        if not pages:
+            return
+
         temp_location = chapter.content_path.with_suffix(".download")
         temp_location.parent.mkdir(parents=True, exist_ok=True)
-        with open(temp_location, "w", encoding="utf-8") as file:
-            file.writelines(pages)
+        async with open_file(temp_location, "w", encoding="utf-8") as file:
+            await file.writelines(pages)
         temp_location.rename(chapter.content_path)
 
     @staticmethod
@@ -135,19 +154,25 @@ class BookDownloader:
 
         return book_path
 
-    def _send_request(self, url: str, **kwargs: Any) -> Response:
-        return send_http_request("GET", url, cookies=self._cookies, verify=self._pem_path, **kwargs)
+    async def _get_book_page(self, url: str) -> str:
+        async with ClientSession(cookies=self._cookies) as session:
+            async with session.get(url, ssl=self._ssl_context) as response:
+                return cast(str, await response.text())
 
-    def _download_page(self, chapter_id: str, page_index: int, csrf: str) -> dict[str, Any]:
-        sleep(self._delay)  # TODO: find better approach
+    async def _get_chapter_data(self, session: ClientSession, chapter_id: str, page: int) -> dict[str, Any]:
+        url = "https://litnet.com/reader/get-page"
+        data = {"chapterId": chapter_id, "page": page}
 
-        response = self._send_request(
-            url="https://litnet.com/reader/get-page",
-            headers={"X-CSRF-Token": csrf},
-            data={"chapterId": chapter_id, "page": page_index},
-        )
-
-        return cast(dict[str, Any], response.json())
+        wait_duration = randint(0, 2)
+        await sleep_for(wait_duration)
+        async with session.get(url, data=data, ssl=self._ssl_context) as response:
+            try:
+                page_data = await response.json(content_type="text/html; charset=utf-8")
+                return cast(dict[str, Any], page_data)
+            except ClientResponseError:
+                return dict()
+            except JSONDecodeError:
+                return dict()
 
     def _add_to_cache(self, book_dir: Path) -> None:
         if book_dir in self._cached_book_data:

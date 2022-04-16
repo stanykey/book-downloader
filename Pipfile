@@ -5,7 +5,8 @@ name = "pypi"
 
 [packages]
 docopt = "*"
-requests = "*"
+aiohttp = "*"
+aiofiles = "*"
 lxml = "*"
 beautifulsoup4 = "*"
 

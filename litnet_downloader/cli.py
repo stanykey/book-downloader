@@ -8,10 +8,8 @@ Usage:
     litnet-downloader -h | --help | --version
 """
 from pathlib import Path
-from time import sleep
 
 from docopt import docopt
-from requests import RequestException
 
 from litnet_downloader.book_data import BookData
 from litnet_downloader.book_downloader import BookDownloader
@@ -22,12 +20,7 @@ from litnet_downloader.utils import book_index_url
 
 
 def download_book_data(downloader: BookDownloader, book_url: str, use_cache: bool) -> BookData:
-    while True:
-        try:
-            return downloader.get(book_url, use_cache, clean_after=False)
-        except RequestException:
-            pass
-        sleep(5)  # TODO: maybe better is to pass as argument
+    return downloader.get(book_url, use_cache, clean_after=False)
 
 
 def export_book_data(book: BookData, /) -> None:
