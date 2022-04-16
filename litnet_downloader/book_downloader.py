@@ -8,7 +8,7 @@ from time import sleep
 from typing import Any
 
 from bs4 import BeautifulSoup
-from requests import request as send_http_request
+from requests import request as send_http_request, Response
 
 from litnet_downloader.book import Book, Chapter
 from litnet_downloader.exceptions import DownloadException
@@ -21,9 +21,10 @@ class BookDownloader:
     def cache_location(cls) -> Path:
         return Path(__file__).parent.resolve() / '.cache'
 
-    def __init__(self, token: str, delay_secs: int = 1):
+    def __init__(self, token: str, delay_secs: int = None, certificate: Path | str = None):
         self._token = token
-        self._delay = delay_secs
+        self._delay = 0 if delay_secs is None else delay_secs
+        self._certificate = None if certificate is None else Path(certificate)
 
         self._cookies = {
             'litera-frontend': token
@@ -53,9 +54,8 @@ class BookDownloader:
         if use_cache and metadata.load() and metadata.completed:
             return metadata
 
-        response = send_http_request('GET', url, cookies=self._cookies)
+        response = self._send_request(url)
         soup = BeautifulSoup(response.text, 'lxml')
-
         try:
             # get common data
             metadata.csrf = soup.find('meta', attrs={'name': 'csrf-token'}).attrs['content']
@@ -124,13 +124,20 @@ class BookDownloader:
 
         return book_path
 
+    def _send_request(self, url: str, **kwargs) -> Response:
+        return send_http_request(
+            'GET',
+            url,
+            cookies=self._cookies,
+            verify=self._certificate,
+            **kwargs
+        )
+
     def _download_page(self, chapter_id: str, page_index: int, csrf: str) -> dict[str, Any]:
         sleep(self._delay)  # TODO: find better approach
 
-        response = send_http_request(
-            method='GET',
+        response = self._send_request(
             url='https://litnet.com/reader/get-page',
-            cookies=self._cookies,
             headers={'X-CSRF-Token': csrf},
             data={'chapterId': chapter_id, 'page': page_index}
         )

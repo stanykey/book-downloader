@@ -4,13 +4,14 @@ auth-token could be obtained from cookie 'litera-frontend'
 
 Usage:
     litnet-downloader interactive
-    litnet-downloader <auth-token> <book-url> [--page-delay=<seconds>]
+    litnet-downloader <auth-token> <book-url> [--page-delay=<seconds>] [--certificate=<file>]
     litnet-downloader -h | --help | --version
 """
 
+
+from pathlib import Path
 from sys import exit
 from time import sleep
-from typing import Any
 
 from bs4 import BeautifulSoup
 from docopt import docopt
@@ -21,12 +22,6 @@ from litnet_downloader.book_downloader import BookDownloader
 from litnet_downloader.exceptions import DownloadException
 from litnet_downloader.utils import book_index_url
 from litnet_downloader.version import __version__
-
-
-def get_option(options: dict[str, Any], key: str, /, *, default: Any = None, result_type=None) -> Any:
-    option = options.get(key, default)
-    option = option if option else default
-    return result_type(option) if result_type else option
 
 
 def get_book(downloader: BookDownloader, book_url: str, use_cache: bool) -> Book:
@@ -65,8 +60,8 @@ def download_book(downloader: BookDownloader, book_url: str, use_cache: bool):
         print(f'Error: {ex}')
 
 
-def run_single_download(token: str, book_url: str, delay_secs: int) -> None:
-    downloader = BookDownloader(token, delay_secs)
+def run_single_download(token: str, book_url: str, delay_secs: int, certificate: Path = None) -> None:
+    downloader = BookDownloader(token, delay_secs, certificate)
 
     download_book(downloader, book_url, use_cache=True)
 
@@ -78,13 +73,19 @@ def run_single_download(token: str, book_url: str, delay_secs: int) -> None:
 
 
 def run_interactive() -> None:
-    token = input('enter auth token or press Enter to exit:\n  >> ')
+    token = input('enter auth token or press Enter to exit >> ')
     if not token:
         return
 
-    downloader = BookDownloader(token)
+    certificate = input('[Optional] enter certificate path or press Enter to skip >>')
+    certificate = Path(certificate).resolve() if certificate else None
+    if certificate and not certificate.exists():
+        print(f'warning: cert files ({certificate}) doesn\'t exist and will be skipped')
+        certificate = None
+
+    downloader = BookDownloader(token, certificate=certificate)
     while True:
-        url = input('enter book url for download or press Enter to exit:\n  >> ')
+        url = input('enter book url for download or press Enter to exit >> ')
         if not url:
             return
 
@@ -104,7 +105,8 @@ def run() -> None:
     return run_single_download(
         token=arguments.get('<auth-token>'),
         book_url=arguments.get('<book-url>'),
-        delay_secs=get_option(arguments, '--page-delay', result_type=int, default=1)
+        delay_secs=arguments['--page-delay'],
+        certificate=arguments['--certificate']
     )
 
 
