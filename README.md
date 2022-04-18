@@ -24,3 +24,12 @@ Actually, this is an educational project with some personal profit: allows you t
   - [ ] fb2
 - [ ] improve ways to circumvent downloads protection mechanisms
 - [ ] improve UI (make fancy command-line UI)
+
+
+---
+For contributors
+
+If you want to contribute please do the following:
+- ensure you have installed the pre-commit package
+- run `pre-commit install`
+- [optionaly] run `pre-commit run --all-files`
