@@ -8,7 +8,6 @@ Usage:
     litnet-downloader -h | --help | --version
 """
 from pathlib import Path
-from sys import exit
 from time import sleep
 
 from bs4 import BeautifulSoup
@@ -50,7 +49,7 @@ def process_book(book: Book, /) -> None:
             book_file.flush()
 
 
-def download_book(downloader: BookDownloader, book_url: str, use_cache: bool):
+def download_book(downloader: BookDownloader, book_url: str, use_cache: bool) -> None:
     try:
         book = get_book(downloader, book_url, use_cache)
         process_book(book)
@@ -58,8 +57,8 @@ def download_book(downloader: BookDownloader, book_url: str, use_cache: bool):
         print(f"Error: {ex}")
 
 
-def run_single_download(token: str, book_url: str, delay_secs: int, certificate: Path = None) -> None:
-    downloader = BookDownloader(token, delay_secs, certificate)
+def run_single_download(token: str, book_url: str, delay_secs: int, pem_path: Path | None = None) -> None:
+    downloader = BookDownloader(token, delay_secs, pem_path)
 
     download_book(downloader, book_url, use_cache=True)
 
@@ -75,13 +74,12 @@ def run_interactive() -> None:
     if not token:
         return
 
-    certificate = input("[Optional] enter certificate path or press Enter to skip >>")
-    certificate = Path(certificate).resolve() if certificate else None
-    if certificate and not certificate.exists():
-        print(f"warning: cert files ({certificate}) doesn't exist and will be skipped")
-        certificate = None
+    pem_path = Path(input("[Optional] enter certificate path or press Enter to skip >>")).resolve()
+    is_pem_path_valid = pem_path.exists() and pem_path.is_file()
+    if not is_pem_path_valid:
+        print(f"warning: cert files ({pem_path}) doesn't exist and will be skipped")
 
-    downloader = BookDownloader(token, certificate=certificate)
+    downloader = BookDownloader(token, pem_path=pem_path if is_pem_path_valid else None)
     while True:
         url = input("enter book url for download or press Enter to exit >> ")
         if not url:
@@ -104,9 +102,9 @@ def run() -> None:
         token=arguments.get("<auth-token>"),
         book_url=arguments.get("<book-url>"),
         delay_secs=arguments["--page-delay"],
-        certificate=arguments["--certificate"],
+        pem_path=arguments["--certificate"],
     )
 
 
 if __name__ == "__main__":
-    exit(run())
+    run()

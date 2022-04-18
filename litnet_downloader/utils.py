@@ -13,12 +13,12 @@ def is_book_url(url: str) -> bool:
 
 
 def book_index_url(url: str) -> str:
-    url = urlparse(url)
+    url_info = urlparse(url)
 
-    if not all([url.scheme, url.netloc, url.path]):
+    if not all([url_info.scheme, url_info.netloc, url_info.path]):
         return ""
 
-    if not fullmatch(pattern=r"\/([a-z]{2})\/reader\/([\w-]+)", string=url.path):
+    if not fullmatch(pattern=r"\/([a-z]{2})\/reader\/([\w-]+)", string=url_info.path):
         return ""
 
-    return f"{url.scheme}://{url.netloc}{url.path}"
+    return f"{url_info.scheme}://{url_info.netloc}{url_info.path}"

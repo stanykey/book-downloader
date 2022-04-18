@@ -14,13 +14,13 @@ class ChapterMetadata:
     title: str
     content_path: Path = field(default_factory=Path)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if not isinstance(self.content_path, Path):
             self.content_path = Path(self.content_path)
 
     @property
     def downloaded(self) -> bool:
-        return self.content_path and self.content_path.exists() and self.content_path.is_file()
+        return self.content_path.exists() and self.content_path.is_file()
 
     def load_content(self) -> str:
         if not self.downloaded:

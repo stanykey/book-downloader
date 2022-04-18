@@ -5,6 +5,7 @@ from pathlib import Path
 from shutil import rmtree
 from time import sleep
 from typing import Any
+from typing import cast
 
 from bs4 import BeautifulSoup
 from requests import request as send_http_request
@@ -23,10 +24,10 @@ class BookDownloader:
     def cache_location(cls) -> Path:
         return Path(__file__).parent.resolve() / ".cache"
 
-    def __init__(self, token: str, delay_secs: int = None, certificate: Path | str = None):
+    def __init__(self, token: str, delay_secs: int = 0, pem_path: Path | None = None):
         self._token = token
-        self._delay = 0 if delay_secs is None else delay_secs
-        self._certificate = None if certificate is None else Path(certificate)
+        self._delay = delay_secs
+        self._pem_path = pem_path
 
         self._cookies = {"litera-frontend": token}
 
@@ -93,7 +94,7 @@ class BookDownloader:
         for chapter in filter(lambda item: not (use_cache and item.downloaded), meta.chapters):
             self._download_chapter(chapter, meta)
 
-    def _download_chapter(self, chapter: ChapterMetadata, meta: BookMetadata):
+    def _download_chapter(self, chapter: ChapterMetadata, meta: BookMetadata) -> None:
         print(f'download chapter "{chapter.title}"...')
 
         pages = self._get_chapter_content(chapter, meta)
@@ -109,7 +110,7 @@ class BookDownloader:
         return pages
 
     @classmethod
-    def _save_chapter_content(cls, chapter: ChapterMetadata, pages: list[str]):
+    def _save_chapter_content(cls, chapter: ChapterMetadata, pages: list[str]) -> None:
         temp_location = chapter.content_path.with_suffix(".download")
         temp_location.parent.mkdir(parents=True, exist_ok=True)
         with open(temp_location, "w", encoding="utf-8") as file:
@@ -134,8 +135,8 @@ class BookDownloader:
 
         return book_path
 
-    def _send_request(self, url: str, **kwargs) -> Response:
-        return send_http_request("GET", url, cookies=self._cookies, verify=self._certificate, **kwargs)
+    def _send_request(self, url: str, **kwargs: Any) -> Response:
+        return send_http_request("GET", url, cookies=self._cookies, verify=self._pem_path, **kwargs)
 
     def _download_page(self, chapter_id: str, page_index: int, csrf: str) -> dict[str, Any]:
         sleep(self._delay)  # TODO: find better approach
@@ -146,7 +147,7 @@ class BookDownloader:
             data={"chapterId": chapter_id, "page": page_index},
         )
 
-        return response.json()
+        return cast(dict[str, Any], response.json())
 
     def _add_to_cache(self, book_dir: Path) -> None:
         if book_dir in self._cached_book_data:
