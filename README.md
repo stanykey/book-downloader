@@ -1,6 +1,6 @@
 # litnet-book-downloader
 
-Small application for downloading books from litnet.com 
+Small application for downloading books from litnet.com
 
 ---
 Actually, this is an educational project with some personal profit: allows you to download books to read when you don't have an Internet connection
@@ -23,3 +23,4 @@ Actually, this is an educational project with some personal profit: allows you t
   - [ ] epub
   - [ ] fb2
 - [ ] improve ways to circumvent downloads protection mechanisms
+- [ ] improve UI (make fancy command-line UI)
