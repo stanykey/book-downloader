@@ -7,8 +7,6 @@ Usage:
     litnet-downloader <auth-token> <book-url> [--page-delay=<seconds>] [--certificate=<file>]
     litnet-downloader -h | --help | --version
 """
-
-
 from pathlib import Path
 from sys import exit
 from time import sleep

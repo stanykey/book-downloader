@@ -1,5 +1,4 @@
 """This module contains setup instructions for litnet_downloader."""
-
 from pathlib import Path
 
 from setuptools import setup
@@ -9,7 +8,7 @@ from litnet_downloader.version import __version__
 
 def read_requirements() -> list[str]:
     requirements_file = Path(__file__).parent.resolve() / 'requirements.txt'
-    with open(requirements_file, 'r', encoding='utf-8') as file:
+    with open(requirements_file, encoding='utf-8') as file:
         requirements = [line.strip() for line in file.readlines()]
 
     requirements.remove('setuptools')

@@ -1,5 +1,4 @@
 """Utilities for different purposes."""
-
 from re import fullmatch
 from urllib.parse import urlparse
 

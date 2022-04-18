@@ -1,5 +1,4 @@
 """Literally, BookDownloader is the main class."""
-
 from functools import cache
 from hashlib import md5
 from pathlib import Path
@@ -8,11 +7,14 @@ from time import sleep
 from typing import Any
 
 from bs4 import BeautifulSoup
-from requests import request as send_http_request, Response
+from requests import request as send_http_request
+from requests import Response
 
-from litnet_downloader.book import Book, Chapter
+from litnet_downloader.book import Book
+from litnet_downloader.book import Chapter
 from litnet_downloader.exceptions import DownloadException
-from litnet_downloader.metadata import ChapterMetadata, BookMetadata
+from litnet_downloader.metadata import BookMetadata
+from litnet_downloader.metadata import ChapterMetadata
 
 
 class BookDownloader:

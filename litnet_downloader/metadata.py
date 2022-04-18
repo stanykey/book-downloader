@@ -1,7 +1,9 @@
 """Contains data classes that represent book-related metadata."""
-
-from dataclasses import dataclass, field
-from json import dump as save_json, load as load_json, JSONDecodeError
+from dataclasses import dataclass
+from dataclasses import field
+from json import dump as save_json
+from json import JSONDecodeError
+from json import load as load_json
 from pathlib import Path
 from typing import Any
 
@@ -24,7 +26,7 @@ class ChapterMetadata:
         if not self.downloaded:
             return ''
 
-        with open(self.content_path, 'r', encoding='utf-8') as file:
+        with open(self.content_path, encoding='utf-8') as file:
             return file.read()
 
     def to_json(self) -> dict[str, Any]:
@@ -61,7 +63,7 @@ class BookMetadata:
         if not self.file_path.exists():
             return False
 
-        with open(self.file_path, 'r', encoding='utf-8') as file:
+        with open(self.file_path, encoding='utf-8') as file:
             try:
                 json: dict[str, Any] = load_json(file)
             except JSONDecodeError:
@@ -82,4 +84,3 @@ class BookMetadata:
             chapters=[chapter.to_json() for chapter in self.chapters]
         )
         return json
-    
