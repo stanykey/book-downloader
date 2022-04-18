@@ -24,17 +24,13 @@ class ChapterMetadata:
 
     def load_content(self) -> str:
         if not self.downloaded:
-            return ''
+            return ""
 
-        with open(self.content_path, encoding='utf-8') as file:
+        with open(self.content_path, encoding="utf-8") as file:
             return file.read()
 
     def to_json(self) -> dict[str, Any]:
-        json = dict(
-            id=self.id,
-            title=self.title,
-            content_path=str(self.content_path)
-        )
+        json = dict(id=self.id, title=self.title, content_path=str(self.content_path))
         return json
 
 
@@ -42,9 +38,9 @@ class ChapterMetadata:
 class BookMetadata:
     working_dir: Path
 
-    csrf: str = ''
-    author: str = ''
-    title: str = ''
+    csrf: str = ""
+    author: str = ""
+    title: str = ""
     chapters: list[ChapterMetadata] = field(default_factory=list)
 
     @property
@@ -53,26 +49,26 @@ class BookMetadata:
 
     @property
     def file_path(self) -> Path:
-        return self.working_dir / 'metadata.json'
+        return self.working_dir / "metadata.json"
 
     def save(self) -> None:
-        with open(self.file_path, 'w', encoding='utf-8') as file:
+        with open(self.file_path, "w", encoding="utf-8") as file:
             save_json(self.to_json(), file, sort_keys=True, indent=4)
 
     def load(self) -> bool:
         if not self.file_path.exists():
             return False
 
-        with open(self.file_path, encoding='utf-8') as file:
+        with open(self.file_path, encoding="utf-8") as file:
             try:
                 json: dict[str, Any] = load_json(file)
             except JSONDecodeError:
                 return False
 
-        self.csrf = json.get('csrf', '')
-        self.author = json.get('author', '')
-        self.title = json.get('title', '')
-        self.chapters = [ChapterMetadata(**item) for item in json.get('chapters', [])]
+        self.csrf = json.get("csrf", "")
+        self.author = json.get("author", "")
+        self.title = json.get("title", "")
+        self.chapters = [ChapterMetadata(**item) for item in json.get("chapters", [])]
 
         return True
 
@@ -81,6 +77,6 @@ class BookMetadata:
             csrf=self.csrf,
             author=self.author,
             title=self.title,
-            chapters=[chapter.to_json() for chapter in self.chapters]
+            chapters=[chapter.to_json() for chapter in self.chapters],
         )
         return json

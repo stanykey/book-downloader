@@ -7,4 +7,4 @@ class DownloadException(Exception):
         self.__dict__.update(kwargs)
 
     def __str__(self):
-        return f'{self.reason}'
+        return f"{self.reason}"

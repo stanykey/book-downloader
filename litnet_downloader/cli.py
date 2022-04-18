@@ -32,21 +32,21 @@ def get_book(downloader: BookDownloader, book_url: str, use_cache: bool) -> Book
 
 
 def process_book(book: Book, /) -> None:
-    with open(f'{book.title}.txt', 'w', encoding='utf-8') as book_file:
+    with open(f"{book.title}.txt", "w", encoding="utf-8") as book_file:
         for idx, chapter in enumerate(book.chapters):
-            print(f'process {idx + 1} of {len(book.chapters)}')
-            print(f'\ttitle: {chapter.title}')
+            print(f"process {idx + 1} of {len(book.chapters)}")
+            print(f"\ttitle: {chapter.title}")
 
-            book_file.write(f'{chapter.title}\n\n')
+            book_file.write(f"{chapter.title}\n\n")
 
             soup = BeautifulSoup(chapter.content)
-            text_blocks = [block.get_text() for block in soup.find_all('p')]
-            chapter_text = '\n\n'.join(text_blocks)
+            text_blocks = [block.get_text() for block in soup.find_all("p")]
+            chapter_text = "\n\n".join(text_blocks)
 
-            print(f'\tchapter_text size: {len(chapter_text)}')
+            print(f"\tchapter_text size: {len(chapter_text)}")
 
             book_file.write(chapter_text)
-            book_file.write('\n\n\n\n')
+            book_file.write("\n\n\n\n")
             book_file.flush()
 
 
@@ -55,7 +55,7 @@ def download_book(downloader: BookDownloader, book_url: str, use_cache: bool):
         book = get_book(downloader, book_url, use_cache)
         process_book(book)
     except DownloadException as ex:
-        print(f'Error: {ex}')
+        print(f"Error: {ex}")
 
 
 def run_single_download(token: str, book_url: str, delay_secs: int, certificate: Path = None) -> None:
@@ -63,50 +63,50 @@ def run_single_download(token: str, book_url: str, delay_secs: int, certificate:
 
     download_book(downloader, book_url, use_cache=True)
 
-    answer = input('Delete cached books data? (yes/no): ')
-    if answer.lower() == 'yes':
+    answer = input("Delete cached books data? (yes/no): ")
+    if answer.lower() == "yes":
         downloader.reset_cache()
 
-    input('Press Enter to exit...')
+    input("Press Enter to exit...")
 
 
 def run_interactive() -> None:
-    token = input('enter auth token or press Enter to exit >> ')
+    token = input("enter auth token or press Enter to exit >> ")
     if not token:
         return
 
-    certificate = input('[Optional] enter certificate path or press Enter to skip >>')
+    certificate = input("[Optional] enter certificate path or press Enter to skip >>")
     certificate = Path(certificate).resolve() if certificate else None
     if certificate and not certificate.exists():
-        print(f'warning: cert files ({certificate}) doesn\'t exist and will be skipped')
+        print(f"warning: cert files ({certificate}) doesn't exist and will be skipped")
         certificate = None
 
     downloader = BookDownloader(token, certificate=certificate)
     while True:
-        url = input('enter book url for download or press Enter to exit >> ')
+        url = input("enter book url for download or press Enter to exit >> ")
         if not url:
             return
 
         if book_url := book_index_url(url):
             download_book(downloader, book_url, use_cache=True)
         else:
-            print('invalid book url')
-            print('valid form is https://litnet.com/<lang>/reader/<book-name>[?params...]')
+            print("invalid book url")
+            print("valid form is https://litnet.com/<lang>/reader/<book-name>[?params...]")
             print()
 
 
 def run() -> None:
     arguments = docopt(__doc__, version=__version__)
-    if arguments.get('interactive'):
+    if arguments.get("interactive"):
         return run_interactive()
 
     return run_single_download(
-        token=arguments.get('<auth-token>'),
-        book_url=arguments.get('<book-url>'),
-        delay_secs=arguments['--page-delay'],
-        certificate=arguments['--certificate']
+        token=arguments.get("<auth-token>"),
+        book_url=arguments.get("<book-url>"),
+        delay_secs=arguments["--page-delay"],
+        certificate=arguments["--certificate"],
     )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     exit(run())

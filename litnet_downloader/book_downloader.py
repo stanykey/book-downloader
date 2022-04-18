@@ -21,16 +21,14 @@ class BookDownloader:
     @classmethod
     @cache
     def cache_location(cls) -> Path:
-        return Path(__file__).parent.resolve() / '.cache'
+        return Path(__file__).parent.resolve() / ".cache"
 
     def __init__(self, token: str, delay_secs: int = None, certificate: Path | str = None):
         self._token = token
         self._delay = 0 if delay_secs is None else delay_secs
         self._certificate = None if certificate is None else Path(certificate)
 
-        self._cookies = {
-            'litera-frontend': token
-        }
+        self._cookies = {"litera-frontend": token}
 
         self._cached_book_data: set[Path] = set()
 
@@ -57,12 +55,12 @@ class BookDownloader:
             return metadata
 
         response = self._send_request(url)
-        soup = BeautifulSoup(response.text, 'lxml')
+        soup = BeautifulSoup(response.text, "lxml")
         try:
             # get common data
-            metadata.csrf = soup.find('meta', attrs={'name': 'csrf-token'}).attrs['content']
-            metadata.author = soup.find('a', class_='sa-name').text
-            metadata.title = soup.find('h1', class_='book-heading').text
+            metadata.csrf = soup.find("meta", attrs={"name": "csrf-token"}).attrs["content"]
+            metadata.author = soup.find("a", class_="sa-name").text
+            metadata.title = soup.find("h1", class_="book-heading").text
 
             # get chapters info
             metadata.chapters = self._load_chapters_metadata(soup, working_dir)
@@ -77,13 +75,13 @@ class BookDownloader:
     @classmethod
     def _load_chapters_metadata(cls, soup: BeautifulSoup, working_dir: Path) -> list[ChapterMetadata]:
         try:
-            chapters_list = soup.find('select', attrs={'name': 'chapter'})
-            chapters = [ChapterMetadata(item['value'], item.text) for item in chapters_list.find_all('option')]
+            chapters_list = soup.find("select", attrs={"name": "chapter"})
+            chapters = [ChapterMetadata(item["value"], item.text) for item in chapters_list.find_all("option")]
         except AttributeError:
             # we have only one chapter so there is no correspond combo box
-            node = soup.find('div', class_='reader-text')
-            chapter_id = node['data-chapter']
-            chapter_title = node.find('h2').text
+            node = soup.find("div", class_="reader-text")
+            chapter_id = node["data-chapter"]
+            chapter_title = node.find("h2").text
             chapters = [ChapterMetadata(chapter_id, chapter_title)]
 
         for meta in chapters:
@@ -104,17 +102,17 @@ class BookDownloader:
     def _get_chapter_content(self, chapter: ChapterMetadata, meta: BookMetadata) -> list[str]:
         data = self._download_page(chapter.id, 1, meta.csrf)
 
-        pages = [data['data']]
-        for page_id in range(2, int(data['totalPages']) + 1):
+        pages = [data["data"]]
+        for page_id in range(2, int(data["totalPages"]) + 1):
             response = self._download_page(chapter.id, page_id, meta.csrf)
-            pages.append(response['data'])
+            pages.append(response["data"])
         return pages
 
     @classmethod
     def _save_chapter_content(cls, chapter: ChapterMetadata, pages: list[str]):
-        temp_location = chapter.content_path.with_suffix('.download')
+        temp_location = chapter.content_path.with_suffix(".download")
         temp_location.parent.mkdir(parents=True, exist_ok=True)
-        with open(temp_location, 'w', encoding='utf-8') as file:
+        with open(temp_location, "w", encoding="utf-8") as file:
             file.writelines(pages)
         temp_location.rename(chapter.content_path)
 
@@ -123,7 +121,7 @@ class BookDownloader:
         book = Book(
             author=meta.author,
             title=meta.title,
-            chapters=[Chapter(info.title, info.load_content()) for info in meta.chapters]
+            chapters=[Chapter(info.title, info.load_content()) for info in meta.chapters],
         )
         return book
 
@@ -137,21 +135,15 @@ class BookDownloader:
         return book_path
 
     def _send_request(self, url: str, **kwargs) -> Response:
-        return send_http_request(
-            'GET',
-            url,
-            cookies=self._cookies,
-            verify=self._certificate,
-            **kwargs
-        )
+        return send_http_request("GET", url, cookies=self._cookies, verify=self._certificate, **kwargs)
 
     def _download_page(self, chapter_id: str, page_index: int, csrf: str) -> dict[str, Any]:
         sleep(self._delay)  # TODO: find better approach
 
         response = self._send_request(
-            url='https://litnet.com/reader/get-page',
-            headers={'X-CSRF-Token': csrf},
-            data={'chapterId': chapter_id, 'page': page_index}
+            url="https://litnet.com/reader/get-page",
+            headers={"X-CSRF-Token": csrf},
+            data={"chapterId": chapter_id, "page": page_index},
         )
 
         return response.json()
@@ -172,7 +164,7 @@ class BookDownloader:
 
     @staticmethod
     def _get_hash(data: str) -> str:
-        return md5(data.encode('utf-8')).hexdigest()
+        return md5(data.encode("utf-8")).hexdigest()
 
     @staticmethod
     def _remove_directory(dir_path: Path) -> None:
@@ -185,5 +177,5 @@ class BookDownloader:
 
     @classmethod
     def compose_chapter_path(cls, chapter: ChapterMetadata, book_dir: Path) -> Path:
-        file_name = cls._get_hash(f'[{chapter.id}][{chapter.title}]')
-        return book_dir / 'chapters' / file_name
+        file_name = cls._get_hash(f"[{chapter.id}][{chapter.title}]")
+        return book_dir / "chapters" / file_name
