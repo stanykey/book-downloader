@@ -1,0 +1,17 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+docopt = "*"
+requests = "*"
+lxml = "*"
+beautifulsoup4 = "*"
+litnet-downloader = {editable = true, path = "."}
+
+[dev-packages]
+pre-commit = "*"
+
+[requires]
+python_version = "3.10"

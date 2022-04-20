@@ -1,6 +1,0 @@
-requests
-beautifulsoup4
-lxml
-docopt
-setuptools
-pre-commit
