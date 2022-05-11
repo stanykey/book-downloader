@@ -13,9 +13,9 @@ from requests import Response
 
 from litnet_downloader.book import Book
 from litnet_downloader.book import Chapter
+from litnet_downloader.details.metadata import BookMetadata
+from litnet_downloader.details.metadata import ChapterMetadata
 from litnet_downloader.exceptions import DownloadException
-from litnet_downloader.metadata import BookMetadata
-from litnet_downloader.metadata import ChapterMetadata
 
 
 class BookDownloader:
