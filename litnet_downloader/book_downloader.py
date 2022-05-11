@@ -11,8 +11,8 @@ from bs4 import BeautifulSoup
 from requests import request as send_http_request
 from requests import Response
 
-from litnet_downloader.book import Book
-from litnet_downloader.book import Chapter
+from litnet_downloader.book_data import BookData
+from litnet_downloader.book_data import ChapterData
 from litnet_downloader.details.metadata import BookMetadata
 from litnet_downloader.details.metadata import ChapterMetadata
 from litnet_downloader.exceptions import DownloadException
@@ -33,7 +33,7 @@ class BookDownloader:
 
         self._cached_book_data: set[Path] = set()
 
-    def get(self, book_url: str, /, use_cache: bool = True, clean_after: bool = True) -> Book:
+    def get(self, book_url: str, /, use_cache: bool = True, clean_after: bool = True) -> BookData:
         book_dir = self._get_working_directory(book_url, clean=not use_cache)
 
         metadata = self._get_book_metadata(book_url, book_dir, use_cache)
@@ -118,11 +118,11 @@ class BookDownloader:
         temp_location.rename(chapter.content_path)
 
     @staticmethod
-    def _make_book(meta: BookMetadata) -> Book:
-        book = Book(
+    def _make_book(meta: BookMetadata) -> BookData:
+        book = BookData(
             author=meta.author,
             title=meta.title,
-            chapters=[Chapter(info.title, info.load_content()) for info in meta.chapters],
+            chapters=[ChapterData(info.title, info.load_content()) for info in meta.chapters],
         )
         return book
 

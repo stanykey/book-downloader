@@ -2,17 +2,17 @@
 from pathlib import Path
 from typing import Protocol
 
-from litnet_downloader.book import Book
-from litnet_downloader.book import Chapter
+from litnet_downloader.book_data import BookData
+from litnet_downloader.book_data import ChapterData
 
 
 class BookFormatter(Protocol):
     @staticmethod
-    def filename(book: Book) -> str:
+    def filename(book: BookData) -> str:
         """Returns filename for corresponded book."""
 
     @staticmethod
-    def prepare(chapter: Chapter) -> str:
+    def prepare(chapter: ChapterData) -> str:
         """Returns content of the chapter."""
 
 
@@ -21,7 +21,7 @@ class BookExporter:
         self._output_root = output_root
         self._exporter = exporter
 
-    def dump(self, book: Book) -> None:
+    def dump(self, book: BookData) -> None:
         book_path = self._output_root / self._exporter.filename(book)
         with open(book_path, "w", encoding="utf-8") as file:
             for chapter in book.chapters:

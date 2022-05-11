@@ -4,13 +4,17 @@ from dataclasses import field
 
 
 @dataclass
-class Chapter:
+class ChapterData:
+    """Represents raw chapter's data."""
+
     title: str = ""
     content: str = ""
 
 
 @dataclass
-class Book:
+class BookData:
+    """Represents raw book's data."""
+
     author: str = ""
     title: str = ""
-    chapters: list[Chapter] = field(default_factory=list)
+    chapters: list[ChapterData] = field(default_factory=list)

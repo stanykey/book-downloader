@@ -13,7 +13,7 @@ from time import sleep
 from docopt import docopt
 from requests import RequestException
 
-from litnet_downloader.book import Book
+from litnet_downloader.book_data import BookData
 from litnet_downloader.book_downloader import BookDownloader
 from litnet_downloader.book_exporter import BookExporter
 from litnet_downloader.exceptions import DownloadException
@@ -21,7 +21,7 @@ from litnet_downloader.formatters import TextFormatter
 from litnet_downloader.utils import book_index_url
 
 
-def get_book(downloader: BookDownloader, book_url: str, use_cache: bool) -> Book:
+def download_book_data(downloader: BookDownloader, book_url: str, use_cache: bool) -> BookData:
     while True:
         try:
             return downloader.get(book_url, use_cache, clean_after=False)
@@ -30,15 +30,15 @@ def get_book(downloader: BookDownloader, book_url: str, use_cache: bool) -> Book
         sleep(5)  # TODO: maybe better is to pass as argument
 
 
-def save_book(book: Book, /) -> None:
+def export_book_data(book: BookData, /) -> None:
     exporter = BookExporter(output_root=Path(__file__).parent / "books", exporter=TextFormatter())
     exporter.dump(book)
 
 
 def download_book(downloader: BookDownloader, book_url: str, use_cache: bool) -> None:
     try:
-        book = get_book(downloader, book_url, use_cache)
-        save_book(book)
+        book_data = download_book_data(downloader, book_url, use_cache)
+        export_book_data(book_data)
     except DownloadException as ex:
         print(f"Error: {ex}")
 
@@ -79,7 +79,8 @@ def run_interactive() -> None:
             print()
 
 
-def run() -> None:
+def main() -> None:
+    """Application entry point."""
     arguments = docopt(__doc__)
     if arguments.get("interactive"):
         return run_interactive()
@@ -93,4 +94,4 @@ def run() -> None:
 
 
 if __name__ == "__main__":
-    run()
+    main()
