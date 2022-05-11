@@ -19,7 +19,6 @@ from litnet_downloader.book_exporter import BookExporter
 from litnet_downloader.exceptions import DownloadException
 from litnet_downloader.formatters import TextFormatter
 from litnet_downloader.utils import book_index_url
-from litnet_downloader.version import __version__
 
 
 def get_book(downloader: BookDownloader, book_url: str, use_cache: bool) -> Book:
@@ -81,7 +80,7 @@ def run_interactive() -> None:
 
 
 def run() -> None:
-    arguments = docopt(__doc__, version=__version__)
+    arguments = docopt(__doc__)
     if arguments.get("interactive"):
         return run_interactive()
 
