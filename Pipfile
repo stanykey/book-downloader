@@ -8,7 +8,6 @@ docopt = "*"
 requests = "*"
 lxml = "*"
 beautifulsoup4 = "*"
-litnet-downloader = {editable = true, path = "."}
 
 [dev-packages]
 pre-commit = "*"

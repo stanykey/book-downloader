@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "f1f17d21284f3217430a4f7ef01f4223f86566530924007c1918f979371be1f9"
+            "sha256": "60ccb782cc89dc60c42a2233e85ef87376394344ab1847cd1b3cc39e96aa75f6"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -53,10 +53,6 @@
             ],
             "markers": "python_version >= '3'",
             "version": "==3.3"
-        },
-        "litnet-downloader": {
-            "editable": true,
-            "path": "."
         },
         "lxml": {
             "hashes": [
@@ -176,11 +172,11 @@
         },
         "identify": {
             "hashes": [
-                "sha256:3f3244a559290e7d3deb9e9adc7b33594c1bc85a9dd82e0f1be519bf12a1ec17",
-                "sha256:5f06b14366bd1facb88b00540a1de05b69b310cbc2654db3c7e07fa3a4339323"
+                "sha256:3acfe15a96e4272b4ec5662ee3e231ceba976ef63fd9980ed2ce9cc415df393f",
+                "sha256:c83af514ea50bf2be2c4a3f2fb349442b59dc87284558ae9ff54191bff3541d2"
             ],
             "markers": "python_version >= '3.7'",
-            "version": "==2.4.12"
+            "version": "==2.5.0"
         },
         "nodeenv": {
             "hashes": [
@@ -199,11 +195,11 @@
         },
         "pre-commit": {
             "hashes": [
-                "sha256:02226e69564ebca1a070bd1f046af866aa1c318dbc430027c50ab832ed2b73f2",
-                "sha256:5d445ee1fa8738d506881c5d84f83c62bb5be6b2838e32207433647e8e5ebe10"
+                "sha256:10c62741aa5704faea2ad69cb550ca78082efe5697d6f04e5710c3c229afdd10",
+                "sha256:4233a1e38621c87d9dda9808c6606d7e7ba0e087cd56d3fe03202a01d2919615"
             ],
             "index": "pypi",
-            "version": "==2.18.1"
+            "version": "==2.19.0"
         },
         "pyyaml": {
             "hashes": [
