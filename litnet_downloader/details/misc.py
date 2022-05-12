@@ -5,8 +5,15 @@ from shutil import rmtree
 
 
 def fingerprint(data: str) -> str:
+    """Returns some kind of hash."""
     return md5(data.encode("utf-8")).hexdigest()
 
 
-def remove_directory(dir_path: Path) -> None:
-    rmtree(dir_path, ignore_errors=True)
+def ensure_directory_exists(path: Path) -> None:
+    """Creates a new directory at this given path if not existing."""
+    path.mkdir(exist_ok=True, parents=True)
+
+
+def remove_directory(path: Path) -> None:
+    """Recursively deletes a directory tree (ignores any errors)."""
+    rmtree(path, ignore_errors=True)
