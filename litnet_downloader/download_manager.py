@@ -1,7 +1,10 @@
 """Literally, DownloadManager is the main class."""
 from asyncio import run as run_coroutine
+from asyncio import set_event_loop_policy
+from asyncio import WindowsSelectorEventLoopPolicy
 from functools import cache
 from pathlib import Path
+from platform import system
 
 from litnet_downloader.book_data import BookData
 from litnet_downloader.book_data import ChapterData
@@ -17,6 +20,11 @@ class DownloadManager:
         self._downloader = BookDownloader(token, pem_path)
 
         self._cached_book_data: set[Path] = set()
+
+        # it's a bit dirty but currently 1 of 2 possible workarounds
+        # https://github.com/aio-libs/aiohttp/issues/4324
+        if system() == "Windows":
+            set_event_loop_policy(WindowsSelectorEventLoopPolicy())
 
     def get_book(self, book_url: str, /, use_cache: bool = True, clean_after: bool = True) -> BookData:
         book_dir = self._get_working_directory(book_url, clean=not use_cache)
