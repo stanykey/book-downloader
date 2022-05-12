@@ -14,7 +14,8 @@ class TextFormatter:
     def prepare(chapter: ChapterData) -> str:
         text_blocks = [chapter.title]
 
-        text_blocks.extend(block.get_text() for block in BeautifulSoup(chapter.content).find_all("p"))
+        soup = BeautifulSoup(chapter.content, "lxml")
+        text_blocks.extend(block.get_text() for block in soup.find_all("p"))
         text_blocks.append("\n\n")
 
         return "\n\n".join(text_blocks)
