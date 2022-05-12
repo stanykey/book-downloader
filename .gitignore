@@ -71,3 +71,4 @@ dmypy.json
 # caches, tests data, etc.
 .cache
 data
+books
