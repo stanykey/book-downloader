@@ -30,9 +30,8 @@ class BookDownloader:
     def cache_location(cls) -> Path:
         return Path(__file__).parent.resolve() / ".cache"
 
-    def __init__(self, token: str, delay_secs: int = 0, pem_path: Path | None = None):
+    def __init__(self, token: str, pem_path: Path | None = None):
         self._token = token
-        self._delay = delay_secs
         self._ssl_context = default_ssl_context(cafile=pem_path)
 
         self._cookies = {"litera-frontend": token}

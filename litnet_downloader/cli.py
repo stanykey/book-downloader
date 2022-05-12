@@ -4,7 +4,7 @@ auth-token could be obtained from cookie 'litera-frontend'
 
 Usage:
     litnet-downloader interactive
-    litnet-downloader <auth-token> <book-url> [--page-delay=<seconds>] [--certificate=<file>]
+    litnet-downloader <auth-token> <book-url> [--certificate=<file>]
     litnet-downloader -h | --help | --version
 """
 from pathlib import Path
@@ -36,8 +36,8 @@ def download_book(downloader: BookDownloader, book_url: str, use_cache: bool) ->
         print(f"Error: {ex}")
 
 
-def run_single_download(token: str, book_url: str, delay_secs: int, pem_path: Path | None = None) -> None:
-    downloader = BookDownloader(token, delay_secs, pem_path)
+def run_single_download(token: str, book_url: str, pem_path: Path | None = None) -> None:
+    downloader = BookDownloader(token, pem_path)
 
     download_book(downloader, book_url, use_cache=True)
 
@@ -81,7 +81,6 @@ def main() -> None:
     return run_single_download(
         token=arguments.get("<auth-token>"),
         book_url=arguments.get("<book-url>"),
-        delay_secs=arguments["--page-delay"],
         pem_path=arguments["--certificate"],
     )
 
