@@ -1,4 +1,4 @@
-"""This module contains the set of BookDownloader's exceptions."""
+"""This module contains the set of the package exceptions."""
 from typing import Any
 
 

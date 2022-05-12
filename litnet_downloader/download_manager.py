@@ -1,13 +1,11 @@
-"""Literally, BookDownloader is the main class."""
+"""Literally, DownloadManager is the main class."""
 from asyncio import gather as wait_for_all
 from asyncio import run as run_coroutine
 from asyncio import sleep as sleep_for
 from functools import cache
-from hashlib import md5
 from json import JSONDecodeError
 from pathlib import Path
 from random import randint
-from shutil import rmtree
 from ssl import create_default_context as default_ssl_context
 from typing import Any
 from typing import cast
@@ -21,10 +19,12 @@ from litnet_downloader.book_data import BookData
 from litnet_downloader.book_data import ChapterData
 from litnet_downloader.details.metadata import BookMetadata
 from litnet_downloader.details.metadata import ChapterMetadata
+from litnet_downloader.details.misc import fingerprint
+from litnet_downloader.details.misc import remove_directory
 from litnet_downloader.exceptions import DownloadException
 
 
-class BookDownloader:
+class DownloadManager:
     @classmethod
     @cache
     def cache_location(cls) -> Path:
@@ -94,7 +94,7 @@ class BookDownloader:
             chapters = [ChapterMetadata(chapter_id, chapter_title)]
 
         for meta in chapters:
-            meta.content_path = cls.compose_chapter_path(meta, working_dir)
+            meta.content_path = cls._compose_chapter_path(meta, working_dir)
 
         return chapters
 
@@ -145,9 +145,9 @@ class BookDownloader:
         return book
 
     def _get_working_directory(self, book_url: str, clean: bool) -> Path:
-        book_path = self.compose_book_path(book_url)
+        book_path = self._compose_book_path(book_url)
         if book_path.exists() and clean:
-            self._remove_directory(book_path)
+            remove_directory(book_path)
 
         self._add_to_cache(book_path)
 
@@ -174,33 +174,19 @@ class BookDownloader:
                 return dict()
 
     def _add_to_cache(self, book_dir: Path) -> None:
-        if book_dir in self._cached_book_data:
-            return
-
         book_dir.mkdir(exist_ok=True, parents=True)
         self._cached_book_data.add(book_dir)
 
     def _remove_from_cache(self, book_dir: Path) -> None:
-        if book_dir not in self._cached_book_data:
-            return
-
-        self._remove_directory(book_dir)
-        self._cached_book_data.remove(book_dir)
-
-    @staticmethod
-    def _get_hash(data: str) -> str:
-        return md5(data.encode("utf-8")).hexdigest()
-
-    @staticmethod
-    def _remove_directory(dir_path: Path) -> None:
-        rmtree(dir_path, ignore_errors=True)
+        remove_directory(book_dir)
+        self._cached_book_data.discard(book_dir)
 
     @classmethod
-    def compose_book_path(cls, book_url: str) -> Path:
-        book_dir_name = cls._get_hash(book_url)
+    def _compose_book_path(cls, book_url: str) -> Path:
+        book_dir_name = fingerprint(book_url)
         return cls.cache_location() / book_dir_name
 
     @classmethod
-    def compose_chapter_path(cls, chapter: ChapterMetadata, book_dir: Path) -> Path:
-        file_name = cls._get_hash(f"[{chapter.id}][{chapter.title}]")
+    def _compose_chapter_path(cls, chapter: ChapterMetadata, book_dir: Path) -> Path:
+        file_name = fingerprint(f"[{chapter.id}][{chapter.title}]")
         return book_dir / "chapters" / file_name
