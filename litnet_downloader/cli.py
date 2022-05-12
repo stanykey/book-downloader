@@ -20,7 +20,7 @@ from litnet_downloader.utils import book_index_url
 
 
 def download_book_data(downloader: DownloadManager, book_url: str, use_cache: bool) -> BookData:
-    return downloader.get(book_url, use_cache, clean_after=False)
+    return downloader.get_book(book_url, use_cache, clean_after=False)
 
 
 def export_book_data(book: BookData, /) -> None:
