@@ -1,10 +1,10 @@
-"""TBD"""
+"""Performs async downloading of book metadata."""
 from asyncio import gather as wait_for_all
 from asyncio import sleep as sleep_for
 from json import JSONDecodeError
 from pathlib import Path
 from random import randint
-from ssl import create_default_context as default_ssl_context
+from ssl import SSLContext
 from typing import Any
 from typing import cast
 
@@ -20,9 +20,9 @@ from litnet_downloader.exceptions import DownloadException
 
 
 class BookDownloader:
-    def __init__(self, token: str, pem_path: Path | None = None):
+    def __init__(self, token: str, ssl_context: SSLContext):
         self._token = token
-        self._ssl_context = default_ssl_context(cafile=pem_path)
+        self._ssl_context = ssl_context
         self._cookies = {"litera-frontend": token}
 
     async def download(self, book_url: str, book_dir: Path) -> BookMetadata:

@@ -1,10 +1,9 @@
 """Literally, DownloadManager is the main class."""
-from asyncio import run as run_coroutine
-from asyncio import set_event_loop_policy
-from asyncio import WindowsSelectorEventLoopPolicy
-from functools import cache
+import asyncio
+import functools
+import platform
+import ssl
 from pathlib import Path
-from platform import system
 
 from litnet_downloader.book_data import BookData
 from litnet_downloader.book_data import ChapterData
@@ -17,19 +16,20 @@ from litnet_downloader.details.misc import remove_directory
 
 class DownloadManager:
     def __init__(self, token: str, pem_path: Path | None = None):
-        self._downloader = BookDownloader(token, pem_path)
+        self._ssl_context = ssl.create_default_context(cafile=pem_path)
+        self._downloader = BookDownloader(token, self._ssl_context)
 
         self._cached_book_data: set[Path] = set()
 
         # it's a bit dirty but currently 1 of 2 possible workarounds
         # https://github.com/aio-libs/aiohttp/issues/4324
-        if system() == "Windows":
-            set_event_loop_policy(WindowsSelectorEventLoopPolicy())
+        if platform.system() == "Windows":
+            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
     def get_book(self, book_url: str, /, use_cache: bool = True, clean_after: bool = True) -> BookData:
         book_dir = self._get_working_directory(book_url, clean=not use_cache)
 
-        metadata: BookMetadata = run_coroutine(self._downloader.download(book_url, book_dir))
+        metadata: BookMetadata = asyncio.run(self._downloader.download(book_url, book_dir))
         book: BookData = self._make_book(metadata)
 
         if clean_after:
@@ -38,7 +38,7 @@ class DownloadManager:
         return book
 
     @classmethod
-    @cache
+    @functools.cache
     def cache_location(cls) -> Path:
         return Path(__file__).parent.resolve() / ".cache"
 
