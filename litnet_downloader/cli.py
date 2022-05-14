@@ -19,6 +19,16 @@ from litnet_downloader.formatters import TextFormatter
 from litnet_downloader.utils import book_index_url
 
 
+def resolve_certificate_path(raw_path: str) -> Path | None:
+    if not raw_path:
+        return None
+
+    pem_path = Path(raw_path).expanduser().resolve()
+    if not (pem_path.exists() and pem_path.is_file()):
+        return None
+    return pem_path
+
+
 def download_book_data(downloader: DownloadManager, book_url: str, use_cache: bool) -> BookData:
     return downloader.get_book(book_url, use_cache, clean_after=False)
 
@@ -53,12 +63,12 @@ def run_interactive() -> None:
     if not token:
         return
 
-    pem_path = Path(input("[Optional] enter certificate path or press Enter to skip >>")).resolve()
-    is_pem_path_valid = pem_path.exists() and pem_path.is_file()
-    if not is_pem_path_valid:
-        print(f"warning: cert files ({pem_path}) doesn't exist and will be skipped")
+    raw_pem_path = input("[Optional] enter certificate path or press Enter to skip >>")
+    pem_path = resolve_certificate_path(raw_pem_path)
+    if raw_pem_path and not pem_path:
+        print(f"warning: couldn't resolve certificate path ({raw_pem_path})and will be skipped")
 
-    downloader = DownloadManager(token, pem_path=pem_path if is_pem_path_valid else None)
+    downloader = DownloadManager(token, pem_path)
     while True:
         url = input("enter book url for download or press Enter to exit >> ")
         if not url:
