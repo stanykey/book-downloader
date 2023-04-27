@@ -12,6 +12,7 @@ beautifulsoup4 = "*"
 
 [dev-packages]
 pre-commit = "*"
+litnet-downloader = {editable = true, path = "."}
 
 [requires]
 python_version = "3.11"
