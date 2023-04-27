@@ -1,4 +1,5 @@
-"""CLI application.
+"""
+CLI application.
 
 auth-token could be obtained from cookie 'litera-frontend'
 
