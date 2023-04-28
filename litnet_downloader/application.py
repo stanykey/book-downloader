@@ -38,12 +38,14 @@ def download_book(downloader: DownloadManager, book_url: str, book_format: BookF
 @command()
 @argument("book-url", type=str, default="test-debug-value")
 @option(
+    "-t",
     "--auth-token",
     type=str,
     required=True,
     help="the authentication token; could be obtained from cookie 'litera-frontend'",
 )
 @option(
+    "-f",
     "--book-format",
     type=Choice(BookFormat),
     default=BookFormat.default,
@@ -51,6 +53,7 @@ def download_book(downloader: DownloadManager, book_url: str, book_format: BookF
     help="book save format",
 )
 @option(
+    "-c",
     "--use-cache",
     type=bool,
     is_flag=True,
