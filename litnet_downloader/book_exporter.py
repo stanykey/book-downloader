@@ -18,15 +18,15 @@ class BookFormatter(Protocol):
 
 
 class BookExporter:
-    def __init__(self, output_root: Path, exporter: BookFormatter):
-        self._output_root = output_root
-        self._exporter = exporter
+    def __init__(self, working_dir: Path, formatter: BookFormatter):
+        self._working_dir = working_dir
+        self._formatter = formatter
 
     def dump(self, book: BookData) -> None:
-        book_path = self._output_root / self._exporter.filename(book)
+        book_path = self._working_dir / self._formatter.filename(book)
         ensure_directory_exists(book_path.parent)
 
         with open(book_path, "w", encoding="utf-8") as file:
             for chapter in book.chapters:
-                file.write(self._exporter.prepare(chapter))
+                file.write(self._formatter.prepare(chapter))
                 file.flush()

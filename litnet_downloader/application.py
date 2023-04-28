@@ -22,14 +22,15 @@ class BookFormat(StrEnum):
     default = txt
 
 
-def download_book(downloader: DownloadManager, book_url: str, book_format: BookFormat, use_cache: bool) -> None:
+def download_book(auth_token: str, book_url: str, book_format: BookFormat, working_dir: Path, use_cache: bool) -> None:
     if book_format is not BookFormat.txt:
         raise ValueError("unsupported format requested")
 
     try:
-        book = downloader.get_book(book_url, use_cache, clean_after=False)
+        downloader = DownloadManager(auth_token, working_dir)
+        book = downloader.get_book(book_url, use_cache)
 
-        exporter = BookExporter(output_root=Path(__file__).parent / "books", exporter=TextFormatter())
+        exporter = BookExporter(working_dir=working_dir, formatter=TextFormatter())
         exporter.dump(book)
     except DownloadException as ex:
         echo(f"Error: {ex}", err=True, color=True)
@@ -53,6 +54,13 @@ def download_book(downloader: DownloadManager, book_url: str, book_format: BookF
     help="book save format",
 )
 @option(
+    "-o",
+    "--working-dir",
+    type=Path,
+    default=Path().absolute(),
+    help="directory to download book  [default: current directory]",
+)
+@option(
     "-c",
     "--use-cache",
     type=bool,
@@ -61,15 +69,13 @@ def download_book(downloader: DownloadManager, book_url: str, book_format: BookF
     show_default=True,
     help="don't delete temporary files; it might be useful if you decide to re-download a book in other formats)",
 )
-def cli(book_url: str, auth_token: str, book_format: BookFormat, use_cache: bool) -> None:
+def cli(book_url: str, auth_token: str, book_format: BookFormat, working_dir: Path, use_cache: bool) -> None:
     """Small application for downloading books from litnet.com."""
     if book_format is not BookFormat.default:
         echo(f"selected format({book_format}) isn't supported yet. the `txt` format will be chosen")
         book_format = BookFormat.default
 
-    downloader = DownloadManager(auth_token)
-
-    download_book(downloader, book_url, book_format, use_cache)
+    download_book(auth_token, book_url, book_format, working_dir, use_cache)
 
     input("Press Enter to exit...")
 
