@@ -20,7 +20,7 @@ The initial education points were the following:
 ## Task List
 - [x] add a possibility to continue/recover work after a crash or any other reason
 - [x] turn all implicit settings to explicit if make sense
-- [ ] segregate components into the core, internal, api, and the app
+- [x] segregate components into the core, internal, and the app
 - [ ] make everything async
 - [ ] save a book into selected format
   - [x] txt

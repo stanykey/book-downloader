@@ -8,13 +8,13 @@ from platform import system
 from ssl import create_default_context
 from tempfile import gettempdir
 
-from litnet_downloader.book_data import BookData
-from litnet_downloader.book_data import ChapterData
-from litnet_downloader.details.book_downloader import BookDownloader
-from litnet_downloader.details.metadata import BookMetadata
-from litnet_downloader.details.misc import ensure_directory_exists
-from litnet_downloader.details.misc import fingerprint
-from litnet_downloader.details.misc import remove_directory
+from litnet_downloader.core.book_data import BookData
+from litnet_downloader.core.book_data import ChapterData
+from litnet_downloader.internal.book_downloader import BookDownloader
+from litnet_downloader.internal.metadata import BookMetadata
+from litnet_downloader.internal.misc import ensure_directory_exists
+from litnet_downloader.internal.misc import fingerprint
+from litnet_downloader.internal.misc import remove_directory
 
 
 class DownloadManager:

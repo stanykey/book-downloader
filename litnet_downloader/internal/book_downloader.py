@@ -13,10 +13,10 @@ from aiohttp import ClientResponseError
 from aiohttp import ClientSession
 from bs4 import BeautifulSoup
 
-from litnet_downloader.details.metadata import BookMetadata
-from litnet_downloader.details.metadata import ChapterMetadata
-from litnet_downloader.details.misc import fingerprint
-from litnet_downloader.exceptions import DownloadException
+from litnet_downloader.core.exceptions import DownloadException
+from litnet_downloader.internal.metadata import BookMetadata
+from litnet_downloader.internal.metadata import ChapterMetadata
+from litnet_downloader.internal.misc import fingerprint
 
 
 class BookDownloader:

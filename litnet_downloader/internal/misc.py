@@ -1,12 +1,12 @@
 """Holds small and handy miscellaneous."""
-from hashlib import md5
+from hashlib import sha256
 from pathlib import Path
 from shutil import rmtree
 
 
 def fingerprint(data: str) -> str:
     """Returns some kind of hash."""
-    return md5(data.encode("utf-8")).hexdigest()
+    return sha256(data.encode("utf-8")).hexdigest()
 
 
 def ensure_directory_exists(path: Path) -> None:

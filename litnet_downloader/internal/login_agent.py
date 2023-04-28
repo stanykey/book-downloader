@@ -1,7 +1,8 @@
-"""Login Agent: TBD"""
-import asyncio
-import webbrowser
+"""Login Agent: TBD."""
+from asyncio import Event
+from asyncio import run
 from typing import Protocol
+from webbrowser import open
 
 from aiohttp import web
 from aiohttp.web_request import Request
@@ -19,7 +20,7 @@ class LoginFlow:
         self._app.add_routes([web.get("/", self._catch_auth_data)])
 
         self._token = ""
-        self._login_event = asyncio.Event()
+        self._login_event = Event()
 
         self._runner = web.AppRunner(self._app)
 
@@ -32,7 +33,7 @@ class LoginFlow:
 
         redirect_uri = f"http://{host}:{port}/"  # noqa
         auth_url = f"https://litnet.com/auth/login?classic=1&link={redirect_uri}"
-        webbrowser.open(auth_url, new=1, autoraise=True)
+        open(auth_url, new=1, autoraise=True)
 
         await self._handle_request()
         await self._server_close()
@@ -61,7 +62,7 @@ class BrowserLoginAgent(LoginAgent):
 
     def get_auth_token(self) -> str:
         if not self._check_token():
-            asyncio.run(self._flow.run_local_server())
+            run(self._flow.run_local_server())
             self._token = self._flow.auth_token
         return self._token
 

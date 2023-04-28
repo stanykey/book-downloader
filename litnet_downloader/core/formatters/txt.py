@@ -1,8 +1,8 @@
 """Basically, the default formatter."""
 from bs4 import BeautifulSoup
 
-from litnet_downloader.book_data import BookData
-from litnet_downloader.book_data import ChapterData
+from litnet_downloader.core.book_data import BookData
+from litnet_downloader.core.book_data import ChapterData
 
 
 class TextFormatter:

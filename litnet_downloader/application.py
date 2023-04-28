@@ -11,10 +11,10 @@ from click import command
 from click import echo
 from click import option
 
-from litnet_downloader.book_exporter import BookExporter
-from litnet_downloader.download_manager import DownloadManager
-from litnet_downloader.exceptions import DownloadException
-from litnet_downloader.formatters import TextFormatter
+from litnet_downloader.core.book_exporter import BookExporter
+from litnet_downloader.core.download_manager import DownloadManager
+from litnet_downloader.core.exceptions import DownloadException
+from litnet_downloader.core.formatters import TextFormatter
 
 
 class BookFormat(StrEnum):

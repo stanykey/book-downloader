@@ -2,9 +2,9 @@
 from pathlib import Path
 from typing import Protocol
 
-from litnet_downloader.book_data import BookData
-from litnet_downloader.book_data import ChapterData
-from litnet_downloader.details.misc import ensure_directory_exists
+from litnet_downloader.core.book_data import BookData
+from litnet_downloader.core.book_data import ChapterData
+from litnet_downloader.internal.misc import ensure_directory_exists
 
 
 class BookFormatter(Protocol):
