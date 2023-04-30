@@ -1,8 +1,6 @@
 """Literally, DownloadManager is the main class."""
 from functools import cached_property
 from pathlib import Path
-from ssl import create_default_context
-from ssl import SSLContext
 from tempfile import gettempdir
 from typing import Protocol
 
@@ -16,14 +14,12 @@ from book_downloader.internal.misc import remove_directory
 
 class BookDownloader(Protocol):
     async def download(self, book_url: str, book_dir: Path) -> BookMetadata:
-        """Download book raw data."""
+        """Download the book's raw data."""
 
 
 class DownloadManager:
-    def __init__(self, working_dir: Path, *, pem_path: Path | None = None) -> None:
+    def __init__(self, working_dir: Path) -> None:
         self._working_dir = working_dir
-        self._ssl_context = create_default_context(cafile=pem_path)
-
         self._cached_book_data: set[Path] = set()
 
     async def get_book(self, book_url: str, downloader: BookDownloader, use_cache: bool = True) -> BookData:
@@ -36,10 +32,6 @@ class DownloadManager:
                 remove_directory(book_dir)
 
         return book
-
-    @property
-    def ssl_context(self) -> SSLContext:
-        return self._ssl_context
 
     @cached_property
     def cache_location(self) -> Path:

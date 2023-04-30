@@ -1,1 +1,1 @@
-"""Contains internal stuff."""
+"""Contains internal very specific stuff."""

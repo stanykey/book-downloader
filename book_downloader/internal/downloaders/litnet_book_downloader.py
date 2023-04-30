@@ -4,7 +4,6 @@ from asyncio import sleep as sleep_for
 from json import JSONDecodeError
 from pathlib import Path
 from random import randint
-from ssl import SSLContext
 from typing import Any
 from typing import cast
 
@@ -20,9 +19,8 @@ from book_downloader.internal.misc import fingerprint
 
 
 class LitnetBookDownloader:
-    def __init__(self, token: str, ssl_context: SSLContext):
+    def __init__(self, token: str):
         self._token = token
-        self._ssl_context = ssl_context
         self._cookies = {"litera-frontend": token}
 
     async def download(self, book_url: str, book_dir: Path) -> BookMetadata:
@@ -111,16 +109,17 @@ class LitnetBookDownloader:
 
     async def _get_book_index_page(self, url: str) -> str:
         async with ClientSession(cookies=self._cookies) as session:
-            async with session.get(url, ssl=self._ssl_context) as response:
+            async with session.get(url) as response:
                 return cast(str, await response.text())
 
-    async def _get_chapter_data(self, session: ClientSession, chapter_id: str, page: int) -> dict[str, Any]:
+    @staticmethod
+    async def _get_chapter_data(session: ClientSession, chapter_id: str, page: int) -> dict[str, Any]:
         url = "https://litnet.com/reader/get-page"
         data = {"chapterId": chapter_id, "page": page}
 
         wait_duration = randint(0, 2)
         await sleep_for(wait_duration)
-        async with session.get(url, data=data, ssl=self._ssl_context) as response:
+        async with session.get(url, data=data) as response:
             try:
                 page_data = await response.json(content_type="text/html; charset=utf-8")
                 return cast(dict[str, Any], page_data)

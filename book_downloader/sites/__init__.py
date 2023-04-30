@@ -4,6 +4,7 @@ from typing import Any
 from typing import Protocol
 
 from book_downloader.core.download_manager import BookDownloader
+from book_downloader.sites.litnet import LitnetService
 
 
 class ServiceId(StrEnum):
@@ -38,4 +39,7 @@ class Service(Protocol):
 
 def make_service(service_id: ServiceId, *args: Any, **kwargs: Any) -> Service | None:
     """Factory method creates service by `id` with provided additional arguments."""
+    if service_id is ServiceId.Litnet:
+        return LitnetService(*args, **kwargs)
+
     return None
