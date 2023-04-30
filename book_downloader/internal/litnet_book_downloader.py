@@ -13,13 +13,13 @@ from aiohttp import ClientResponseError
 from aiohttp import ClientSession
 from bs4 import BeautifulSoup
 
-from litnet_downloader.core.exceptions import DownloadException
-from litnet_downloader.internal.metadata import BookMetadata
-from litnet_downloader.internal.metadata import ChapterMetadata
-from litnet_downloader.internal.misc import fingerprint
+from book_downloader.core.exceptions import DownloadException
+from book_downloader.internal.metadata import BookMetadata
+from book_downloader.internal.metadata import ChapterMetadata
+from book_downloader.internal.misc import fingerprint
 
 
-class BookDownloader:
+class LitnetBookDownloader:
     def __init__(self, token: str, ssl_context: SSLContext):
         self._token = token
         self._ssl_context = ssl_context

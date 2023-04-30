@@ -4,9 +4,9 @@ from typing import Protocol
 
 from aiofiles import open
 
-from litnet_downloader.core.book_data import BookData
-from litnet_downloader.core.book_data import ChapterData
-from litnet_downloader.internal.misc import ensure_directory_exists
+from book_downloader.core.book_data import BookData
+from book_downloader.core.book_data import ChapterData
+from book_downloader.internal.misc import ensure_directory_exists
 
 
 class BookFormatter(Protocol):

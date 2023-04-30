@@ -1,4 +1,4 @@
-"""This module contains setup instructions for litnet_downloader."""
+"""This module contains setup instructions for book_downloader."""
 from setuptools import setup
 
 

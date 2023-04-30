@@ -2,7 +2,7 @@
 from enum import auto
 from enum import StrEnum
 
-from litnet_downloader.core.formatters.txt import TextFormatter
+from book_downloader.core.formatters.txt import TextFormatter
 
 
 class BookFormat(StrEnum):

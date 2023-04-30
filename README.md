@@ -1,6 +1,7 @@
-# litnet-book-downloader
+# book-downloader
 
 Small application for downloading books from litnet.com
+(and, later, some other sites that don't provide an official way to download books)
 
 
 ---
@@ -15,6 +16,7 @@ The initial education points were the following:
   - some security moments
 - asyncio
 - ebook composing
+
 
 ---
 ## Task List

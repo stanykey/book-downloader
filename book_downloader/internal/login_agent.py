@@ -16,7 +16,7 @@ class LoginAgent(Protocol):
         """Provides authentication token."""
 
 
-class LoginFlow:
+class LitnetLoginFlow:
     def __init__(self) -> None:
         self._app = web.Application()
         self._app.add_routes([web.get("/", self._catch_auth_data)])
@@ -57,9 +57,9 @@ class LoginFlow:
         return web.Response(body="You can close page now")
 
 
-class BrowserLoginAgent:
+class LitnetBrowserLoginAgent:
     def __init__(self) -> None:
-        self._flow = LoginFlow()
+        self._flow = LitnetLoginFlow()
         self._token = ""
 
     async def get_auth_token(self) -> str:
@@ -72,7 +72,7 @@ class BrowserLoginAgent:
         return len(self._token) > 0
 
 
-class ConsoleLoginAgent(LoginAgent):
+class SimpleConsoleLoginAgent:
     def __init__(self, prompt_text: str):
         self._text = prompt_text
 
@@ -82,7 +82,7 @@ class ConsoleLoginAgent(LoginAgent):
 
 
 async def main() -> None:
-    agent = BrowserLoginAgent()
+    agent = LitnetBrowserLoginAgent()
     token = await agent.get_auth_token()
     print(token)
 
