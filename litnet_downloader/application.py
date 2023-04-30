@@ -1,10 +1,6 @@
 """CLI application."""
 from asyncio import run
-from enum import auto
-from enum import StrEnum
 from pathlib import Path
-from re import fullmatch
-from urllib.parse import urlparse
 
 from click import argument
 from click import Choice
@@ -15,27 +11,9 @@ from click import option
 from litnet_downloader.core.book_exporter import BookExporter
 from litnet_downloader.core.download_manager import DownloadManager
 from litnet_downloader.core.exceptions import DownloadException
+from litnet_downloader.core.formatters import BookFormat
 from litnet_downloader.core.formatters import TextFormatter
-
-
-class BookFormat(StrEnum):
-    txt = auto()
-    epub = auto()
-    fb2 = auto()
-    default = txt
-
-
-def book_index_url(url: str) -> str:
-    """Returns well-formed book root URL or an empty string if impossible."""
-    url_info = urlparse(url)
-
-    if not all([url_info.scheme, url_info.netloc, url_info.path]):
-        return ""
-
-    if not fullmatch(pattern=r"\/([a-z]{2})\/reader\/([\w-]+)", string=url_info.path):
-        return ""
-
-    return f"{url_info.scheme}://{url_info.netloc}{url_info.path}"
+from litnet_downloader.core.helpers import canonical_book_url
 
 
 async def download_book(token: str, book_url: str, book_format: BookFormat, working_dir: Path, use_cache: bool) -> None:
@@ -87,7 +65,7 @@ async def download_book(token: str, book_url: str, book_format: BookFormat, work
 )
 def cli(url: str, auth_token: str, book_format: BookFormat, working_dir: Path, use_cache: bool) -> None:
     """Small application for downloading books from litnet.com."""
-    book_url = book_index_url(url)
+    book_url = canonical_book_url(url)
     if not book_url:
         echo(f"url ({book_url}) isn't valid book url")
         return
