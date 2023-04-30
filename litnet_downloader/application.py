@@ -14,6 +14,7 @@ from litnet_downloader.core.exceptions import DownloadException
 from litnet_downloader.core.formatters import BookFormat
 from litnet_downloader.core.formatters import TextFormatter
 from litnet_downloader.core.helpers import canonical_book_url
+from litnet_downloader.core.helpers import is_url_accessible
 
 
 async def download_book(token: str, book_url: str, book_format: BookFormat, working_dir: Path, use_cache: bool) -> None:
@@ -67,11 +68,15 @@ def cli(url: str, auth_token: str, book_format: BookFormat, working_dir: Path, u
     """Small application for downloading books from litnet.com."""
     book_url = canonical_book_url(url)
     if not book_url:
-        echo(f"url ({book_url}) isn't valid book url")
+        echo(f"url ({book_url}) isn't valid book url", err=True)
+        return
+
+    if not run(is_url_accessible(book_url)):
+        echo(f"url ({book_url}) is unreachable", err=True)
         return
 
     if book_format is not BookFormat.default:
-        echo(f"selected format({book_format}) isn't supported yet. the `txt` format will be chosen")
+        echo(f"selected format({book_format}) isn't supported yet. the `txt` format will be chosen", err=True)
         book_format = BookFormat.default
 
     run(download_book(auth_token, book_url, book_format, working_dir, use_cache))
