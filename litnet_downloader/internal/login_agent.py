@@ -1,16 +1,18 @@
 """Login Agent: TBD."""
 from asyncio import Event
 from asyncio import run
+from typing import cast
 from typing import Protocol
 from webbrowser import open
 
 from aiohttp import web
 from aiohttp.web_request import Request
 from aiohttp.web_response import Response
+from click import prompt
 
 
 class LoginAgent(Protocol):
-    def get_auth_token(self) -> str:
+    async def get_auth_token(self) -> str:
         """Provides authentication token."""
 
 
@@ -55,14 +57,14 @@ class LoginFlow:
         return web.Response(body="You can close page now")
 
 
-class BrowserLoginAgent(LoginAgent):
+class BrowserLoginAgent:
     def __init__(self) -> None:
         self._flow = LoginFlow()
         self._token = ""
 
-    def get_auth_token(self) -> str:
+    async def get_auth_token(self) -> str:
         if not self._check_token():
-            run(self._flow.run_local_server())
+            await self._flow.run_local_server()
             self._token = self._flow.auth_token
         return self._token
 
@@ -71,17 +73,19 @@ class BrowserLoginAgent(LoginAgent):
 
 
 class ConsoleLoginAgent(LoginAgent):
-    def __init__(self, prompt: str):
-        self._prompt = prompt
+    def __init__(self, prompt_text: str):
+        self._text = prompt_text
 
-    def get_auth_token(self) -> str:
-        return input(self._prompt)
+    async def get_auth_token(self) -> str:
+        token = prompt(self._text, type=str, confirmation_prompt=True)
+        return cast(str, token)
 
 
-def main() -> None:
-    agent: LoginAgent = BrowserLoginAgent()
-    print(agent.get_auth_token())
+async def main() -> None:
+    agent = BrowserLoginAgent()
+    token = await agent.get_auth_token()
+    print(token)
 
 
 if __name__ == "__main__":
-    main()
+    run(main())

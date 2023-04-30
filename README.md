@@ -22,6 +22,8 @@ The initial education points were the following:
 - [x] turn all implicit settings to explicit if make sense
 - [x] segregate components into the core, internal, and the app
 - [ ] make everything async
+  - [x] do all work with files via the aiofiles
+  - [ ] do all parsing/serialization jobs on a threads pool
 - [ ] save a book into selected format
   - [x] txt
   - [ ] epub

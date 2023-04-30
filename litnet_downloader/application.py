@@ -1,4 +1,5 @@
 """CLI application."""
+from asyncio import run
 from enum import auto
 from enum import StrEnum
 from pathlib import Path
@@ -37,22 +38,22 @@ def book_index_url(url: str) -> str:
     return f"{url_info.scheme}://{url_info.netloc}{url_info.path}"
 
 
-def download_book(auth_token: str, book_url: str, book_format: BookFormat, working_dir: Path, use_cache: bool) -> None:
+async def download_book(token: str, book_url: str, book_format: BookFormat, working_dir: Path, use_cache: bool) -> None:
     if book_format is not BookFormat.txt:
         raise ValueError("unsupported format requested")
 
     try:
-        downloader = DownloadManager(auth_token, working_dir)
-        book = downloader.get_book(book_url, use_cache)
+        downloader = DownloadManager(token, working_dir)
+        book = await downloader.get_book(book_url, use_cache)
 
         exporter = BookExporter(working_dir=working_dir, formatter=TextFormatter())
-        exporter.dump(book)
+        await exporter.dump(book)
     except DownloadException as ex:
         echo(f"Error: {ex}", err=True, color=True)
 
 
 @command()
-@argument("url", type=str, help="book url to download")
+@argument("url", type=str)
 @option(
     "-t",
     "--auth-token",
@@ -95,7 +96,7 @@ def cli(url: str, auth_token: str, book_format: BookFormat, working_dir: Path, u
         echo(f"selected format({book_format}) isn't supported yet. the `txt` format will be chosen")
         book_format = BookFormat.default
 
-    download_book(auth_token, book_url, book_format, working_dir, use_cache)
+    run(download_book(auth_token, book_url, book_format, working_dir, use_cache))
 
     input("Press Enter to exit...")
 

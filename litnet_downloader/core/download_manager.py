@@ -1,10 +1,6 @@
 """Literally, DownloadManager is the main class."""
-from asyncio import run
-from asyncio import set_event_loop_policy
-from asyncio import WindowsSelectorEventLoopPolicy
 from functools import cached_property
 from pathlib import Path
-from platform import system
 from ssl import create_default_context
 from tempfile import gettempdir
 
@@ -25,16 +21,11 @@ class DownloadManager:
 
         self._cached_book_data: set[Path] = set()
 
-        # it's a bit dirty but currently 1 of 2 possible workarounds
-        # https://github.com/aio-libs/aiohttp/issues/4324
-        if system() == "Windows":
-            set_event_loop_policy(WindowsSelectorEventLoopPolicy())
-
-    def get_book(self, book_url: str, /, use_cache: bool = True) -> BookData:
+    async def get_book(self, book_url: str, /, use_cache: bool = True) -> BookData:
         book_dir = self._get_working_directory(book_url, use_cache)
         try:
-            metadata: BookMetadata = run(self._downloader.download(book_url, book_dir))
-            book: BookData = self._make_book(metadata)
+            metadata = await self._downloader.download(book_url, book_dir)
+            book = await self._make_book(metadata)
         finally:
             if not use_cache:
                 remove_directory(book_dir)
@@ -67,11 +58,11 @@ class DownloadManager:
         self._cached_book_data.discard(book_dir)
 
     @staticmethod
-    def _make_book(meta: BookMetadata) -> BookData:
+    async def _make_book(meta: BookMetadata) -> BookData:
         book = BookData(
             author=meta.author,
             title=meta.title,
-            chapters=[ChapterData(info.title, info.load_content()) for info in meta.chapters],
+            chapters=[ChapterData(info.title, await info.load_content()) for info in meta.chapters],
         )
         return book
 

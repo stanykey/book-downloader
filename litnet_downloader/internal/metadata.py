@@ -1,11 +1,13 @@
 """Contains data classes that represent book-related metadata."""
 from dataclasses import dataclass
 from dataclasses import field
-from json import dump as save_json
+from json import dumps
 from json import JSONDecodeError
-from json import load as load_json
+from json import loads
 from pathlib import Path
 from typing import Any
+
+from aiofiles import open
 
 
 @dataclass
@@ -22,12 +24,12 @@ class ChapterMetadata:
     def downloaded(self) -> bool:
         return self.content_path.exists() and self.content_path.is_file()
 
-    def load_content(self) -> str:
+    async def load_content(self) -> str:
         if not self.downloaded:
             return ""
 
-        with open(self.content_path, encoding="utf-8") as file:
-            return file.read()
+        async with open(self.content_path, encoding="utf-8") as file:
+            return await file.read()
 
     def to_json(self) -> dict[str, Any]:
         json = dict(id=self.id, title=self.title, content_path=str(self.content_path))
@@ -51,17 +53,20 @@ class BookMetadata:
     def file_path(self) -> Path:
         return self.working_dir / "metadata.json"
 
-    def save(self) -> None:
-        with open(self.file_path, "w", encoding="utf-8") as file:
-            save_json(self.to_json(), file, sort_keys=True, indent=4)
+    async def save(self) -> None:
+        async with open(self.file_path, "w", encoding="utf-8") as file:
+            json = dumps(self.to_json(), sort_keys=True, indent=4)
+            await file.write(json)
+            await file.flush()
 
-    def load(self) -> bool:
+    async def load(self) -> bool:
         if not self.file_path.exists():
             return False
 
-        with open(self.file_path, encoding="utf-8") as file:
+        async with open(self.file_path, encoding="utf-8") as file:
+            file_content = await file.read()
             try:
-                json: dict[str, Any] = load_json(file)
+                json = loads(file_content)
             except JSONDecodeError:
                 return False
 

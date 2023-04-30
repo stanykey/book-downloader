@@ -51,7 +51,7 @@ class BookDownloader:
         except AttributeError:
             raise DownloadException(reason="Couldn't obtain metadata", response=response, url=url)
 
-        metadata.save()
+        await metadata.save()
 
         return metadata
 

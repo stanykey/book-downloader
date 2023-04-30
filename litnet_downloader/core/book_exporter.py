@@ -2,6 +2,8 @@
 from pathlib import Path
 from typing import Protocol
 
+from aiofiles import open
+
 from litnet_downloader.core.book_data import BookData
 from litnet_downloader.core.book_data import ChapterData
 from litnet_downloader.internal.misc import ensure_directory_exists
@@ -22,11 +24,11 @@ class BookExporter:
         self._working_dir = working_dir
         self._formatter = formatter
 
-    def dump(self, book: BookData) -> None:
+    async def dump(self, book: BookData) -> None:
         book_path = self._working_dir / self._formatter.filename(book)
         ensure_directory_exists(book_path.parent)
 
-        with open(book_path, "w", encoding="utf-8") as file:
+        async with open(book_path, "w", encoding="utf-8") as file:
             for chapter in book.chapters:
-                file.write(self._formatter.prepare(chapter))
-                file.flush()
+                await file.write(self._formatter.prepare(chapter))
+                await file.flush()
