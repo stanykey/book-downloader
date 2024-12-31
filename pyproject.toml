@@ -1,3 +1,60 @@
 [build-system]
-requires = ["setuptools", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "book-downloader"
+version = "1.3.0"
+description = "Utility allows downloading books from litnet.com (and some other sites in the future)"
+authors = ["Sergii Lovygin <sergey.lovygin@yahoo.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "~=3.12"
+click = "*"
+aiohttp = "*"
+aiofiles = "*"
+lxml = "*"
+beautifulsoup4 = "*"
+
+[tool.poetry.dev-dependencies]
+pre-commit = "*"
+ruff = "*"
+mypy = "*"
+
+[tool.poetry.scripts]
+book-downloader = "book_downloader.application:cli"
+
+[tool.ruff]
+fix = true
+line-length = 120
+indent-width = 4
+target-version = "py312"
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+skip-magic-trailing-comma = true
+docstring-code-format = true
+docstring-code-line-length = "dynamic"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "B"]
+extend-select = ["I"]
+ignore = ["E501"]
+unfixable = ["B"]
+
+[tool.ruff.lint.isort]
+force-single-line = true
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["E402"]
+"**/{tests,docs,tools}/*" = ["E402"]
+
+[tool.mypy]
+show_error_codes = true
+check_untyped_defs = true
+warn_unused_ignores = true
+warn_redundant_casts = true
