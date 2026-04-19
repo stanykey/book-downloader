@@ -1,4 +1,5 @@
 """Literally, DownloadManager is the main class."""
+
 from functools import cached_property
 from pathlib import Path
 from tempfile import gettempdir

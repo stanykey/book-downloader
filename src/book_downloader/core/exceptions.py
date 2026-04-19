@@ -1,4 +1,5 @@
 """This module contains the set of the package exceptions."""
+
 from typing import Any
 
 

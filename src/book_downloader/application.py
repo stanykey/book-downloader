@@ -1,9 +1,10 @@
 """CLI application."""
+
 from asyncio import run
 from pathlib import Path
 
-from click import argument
 from click import Choice
+from click import argument
 from click import command
 from click import echo
 from click import option
@@ -13,9 +14,9 @@ from book_downloader.core.download_manager import DownloadManager
 from book_downloader.core.exceptions import DownloadException
 from book_downloader.core.formatters import BookFormat
 from book_downloader.core.formatters import TextFormatter
-from book_downloader.sites import make_service
 from book_downloader.sites import Service
 from book_downloader.sites import ServiceId
+from book_downloader.sites import make_service
 
 
 def get_service_id(url: str) -> ServiceId | None:

@@ -1,8 +1,9 @@
 """Contains data classes that represent book-related metadata."""
+
 from dataclasses import dataclass
 from dataclasses import field
-from json import dumps
 from json import JSONDecodeError
+from json import dumps
 from json import loads
 from pathlib import Path
 from typing import Any

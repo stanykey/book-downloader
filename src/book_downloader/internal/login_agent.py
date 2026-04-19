@@ -1,8 +1,9 @@
 """Login Agent: TBD."""
+
 from asyncio import Event
 from asyncio import run
-from typing import cast
 from typing import Protocol
+from typing import cast
 from webbrowser import open
 
 from aiohttp import web

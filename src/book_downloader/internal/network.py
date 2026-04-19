@@ -1,4 +1,5 @@
 """Small core helpers."""
+
 from platform import system
 from subprocess import call
 
@@ -32,5 +33,5 @@ async def is_url_reachable(url: str) -> bool:
             async with session.get(url) as response:
                 return bool(response.ok)
 
-    except (TimeoutError, ClientError, AssertionError):
+    except TimeoutError, ClientError, AssertionError:
         return False

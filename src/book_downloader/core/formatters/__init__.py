@@ -1,6 +1,7 @@
 """Book formatters."""
-from enum import auto
+
 from enum import StrEnum
+from enum import auto
 
 from book_downloader.core.formatters.txt import TextFormatter
 

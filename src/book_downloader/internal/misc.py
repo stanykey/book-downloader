@@ -1,4 +1,5 @@
 """Holds small and handy miscellaneous."""
+
 from hashlib import sha256
 from pathlib import Path
 from shutil import rmtree

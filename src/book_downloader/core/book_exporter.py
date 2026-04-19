@@ -1,4 +1,5 @@
 """Describes BookExported protocol."""
+
 from pathlib import Path
 from typing import Protocol
 
@@ -12,7 +13,7 @@ from book_downloader.internal.misc import ensure_directory_exists
 class BookFormatter(Protocol):
     @staticmethod
     def filename(book: BookData) -> str:
-        """Returns filename for corresponded book."""
+        """Returns filename for a corresponded book."""
 
     @staticmethod
     def prepare(chapter: ChapterData) -> str:

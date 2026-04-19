@@ -1,4 +1,5 @@
 """Provide the `Service` protocol and implementations."""
+
 from enum import StrEnum
 from typing import Any
 from typing import Protocol

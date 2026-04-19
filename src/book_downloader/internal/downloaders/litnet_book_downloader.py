@@ -1,4 +1,5 @@
 """Performs async downloading of book metadata."""
+
 from asyncio import gather as wait_for_all
 from asyncio import sleep as sleep_for
 from json import JSONDecodeError

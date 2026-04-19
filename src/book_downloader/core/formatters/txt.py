@@ -1,4 +1,5 @@
 """Basically, the default formatter."""
+
 from bs4 import BeautifulSoup
 
 from book_downloader.core.book_data import BookData
