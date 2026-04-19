@@ -2,6 +2,7 @@
 
 from asyncio import run
 from pathlib import Path
+from urllib.parse import urlparse
 
 from click import Choice
 from click import argument
@@ -20,7 +21,9 @@ from book_downloader.sites import make_service
 
 
 def get_service_id(url: str) -> ServiceId | None:
-    if "litnet.com" in url:
+    host = urlparse(url).netloc.lower()
+    host = host.split(":", maxsplit=1)[0]
+    if host == "litnet.com" or host.endswith(".litnet.com"):
         return ServiceId.Litnet
 
     return None
