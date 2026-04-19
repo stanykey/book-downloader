@@ -35,7 +35,7 @@ class LitnetBookDownloader:
 
     async def _get_book_metadata(self, url: str, working_dir: Path) -> BookMetadata:
         metadata = BookMetadata(working_dir)
-        if metadata.load() and metadata.completed:
+        if await metadata.load() and metadata.completed:
             return metadata
 
         response = await self._get_book_index_page(url)
