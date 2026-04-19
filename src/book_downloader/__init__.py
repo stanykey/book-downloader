@@ -1,1 +1,1 @@
-"""Utility allows to download books from litnet.com."""
+"""Utility allows downloading books from litnet.com."""

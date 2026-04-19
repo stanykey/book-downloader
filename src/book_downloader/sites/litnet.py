@@ -26,7 +26,7 @@ class LitnetService:
 
     @classmethod
     def canonical_book_url(cls, url: str) -> str:
-        """Return well-formed book root URL or an empty string if impossible."""
+        """Return a well-formed book root URL or an empty string if impossible."""
         url_info = urlparse(url)
 
         if not all([url_info.scheme, url_info.netloc, url_info.path]):

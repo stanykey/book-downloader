@@ -1,4 +1,4 @@
-"""Contains book related entities."""
+"""Contains book-related entities."""
 
 from dataclasses import dataclass
 from dataclasses import field

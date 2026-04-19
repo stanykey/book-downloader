@@ -25,7 +25,7 @@ class Service(Protocol):
 
     @classmethod
     async def check_url(cls, url: str) -> bool:
-        """Check the accessibility of url."""
+        """Check the accessibility of the url."""
         ...
 
     @classmethod

@@ -23,12 +23,12 @@ def ping(host: str) -> bool:
 
 async def is_url_reachable(url: str) -> bool:
     """
-    Check availability of the `url`.
+    Check the availability of the `url`.
 
-    Not the best way, but better then nothing
+    Not the best way, but better than nothing
     """
     try:
-        timeout = ClientTimeout(total=5)  # 5secs for all
+        timeout = ClientTimeout(total=5)  # 5 secs for all
         async with ClientSession(timeout=timeout) as session:
             async with session.get(url) as response:
                 return bool(response.ok)
