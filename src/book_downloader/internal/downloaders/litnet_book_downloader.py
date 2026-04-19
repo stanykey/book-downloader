@@ -12,6 +12,7 @@ from aiofiles import open as open_file
 from aiohttp import ClientResponseError
 from aiohttp import ClientSession
 from bs4 import BeautifulSoup
+from bs4.element import Tag
 
 from book_downloader.core.exceptions import DownloadException
 from book_downloader.internal.metadata import BookMetadata
@@ -41,14 +42,28 @@ class LitnetBookDownloader:
         soup = BeautifulSoup(response, "lxml")
         try:
             # get common data
-            metadata.csrf = soup.find("meta", attrs={"name": "csrf-token"}).attrs["content"]
-            metadata.author = soup.find("a", class_="sa-name").text
-            metadata.title = soup.find("h1", class_="book-heading").text
+            csrf_meta = soup.find("meta", attrs={"name": "csrf-token"})
+            if not isinstance(csrf_meta, Tag):
+                raise AttributeError("csrf meta tag not found")
+            csrf = csrf_meta.get("content")
+            if not isinstance(csrf, str):
+                raise AttributeError("csrf content is missing")
+            metadata.csrf = csrf
+
+            author_node = soup.find("a", class_="sa-name")
+            if not isinstance(author_node, Tag):
+                raise AttributeError("author node not found")
+            metadata.author = author_node.get_text()
+
+            title_node = soup.find("h1", class_="book-heading")
+            if not isinstance(title_node, Tag):
+                raise AttributeError("title node not found")
+            metadata.title = title_node.get_text()
 
             # get chapters info
             metadata.chapters = await self._load_chapters_metadata(soup, working_dir)
-        except AttributeError:
-            raise DownloadException(reason="Couldn't obtain metadata", response=response, url=url)
+        except AttributeError as ex:
+            raise DownloadException(reason="Couldn't obtain metadata", response=response, url=url) from ex
 
         await metadata.save()
 
@@ -58,12 +73,34 @@ class LitnetBookDownloader:
     async def _load_chapters_metadata(cls, soup: BeautifulSoup, working_dir: Path) -> list[ChapterMetadata]:
         try:
             chapters_list = soup.find("select", attrs={"name": "chapter"})
-            chapters = [ChapterMetadata(item["value"], item.text) for item in chapters_list.find_all("option")]
-        except AttributeError:
+            if not isinstance(chapters_list, Tag):
+                raise AttributeError("chapters list node not found")
+
+            chapters: list[ChapterMetadata] = []
+            for item in chapters_list.find_all("option"):
+                if not isinstance(item, Tag):
+                    continue
+                chapter_id = item.get("value")
+                if not isinstance(chapter_id, str):
+                    continue
+                chapters.append(ChapterMetadata(chapter_id, item.get_text()))
+
+            if not chapters:
+                raise AttributeError("chapter options are missing")
+        except AttributeError as ex:
             # we have only one chapter so there is no correspond combo box
             node = soup.find("div", class_="reader-text")
-            chapter_id = node["data-chapter"]
-            chapter_title = node.find("h2").text
+            if not isinstance(node, Tag):
+                raise AttributeError("reader text node not found") from ex
+
+            chapter_id = node.get("data-chapter")
+            if not isinstance(chapter_id, str):
+                raise AttributeError("chapter id is missing") from ex
+
+            chapter_title_node = node.find("h2")
+            if not isinstance(chapter_title_node, Tag):
+                raise AttributeError("chapter title node not found") from ex
+            chapter_title = chapter_title_node.get_text()
             chapters = [ChapterMetadata(chapter_id, chapter_title)]
 
         for meta in chapters:
@@ -111,7 +148,7 @@ class LitnetBookDownloader:
     async def _get_book_index_page(self, url: str) -> str:
         async with ClientSession(cookies=self._cookies) as session:
             async with session.get(url) as response:
-                return cast(str, await response.text())
+                return await response.text()
 
     @staticmethod
     async def _get_chapter_data(session: ClientSession, chapter_id: str, page: int) -> dict[str, Any]:
