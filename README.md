@@ -2,6 +2,11 @@
 
 CLI utility for downloading books from Litnet and exporting them as text files.
 
+## Project Status
+
+This project was created for educational and entertainment purposes.
+At this time, further maintenance and development are not planned, and the project is archived.
+
 ## Quick Start
 
 1. Install dependencies:
