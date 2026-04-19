@@ -68,10 +68,7 @@ async def download_book(
     help="directory to download book  [default: current directory]",
 )
 @option(
-    "-c",
-    "--use-cache",
-    type=bool,
-    is_flag=True,
+    "--use-cache/--no-cache",
     default=True,
     show_default=True,
     help="don't delete temporary files; it might be useful if you decide to re-download a book in other formats)",
